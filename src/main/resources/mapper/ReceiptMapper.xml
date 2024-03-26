@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.liwei.rent.dao.ReceiptMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.liwei.rent.entity.Receipt">
+        <id column="id" property="id" />
+        <result column="apartment_id" property="apartmentId" />
+        <result column="tenant_id" property="tenantId" />
+        <result column="tenant_name" property="tenantName" />
+        <result column="room_num" property="roomNum" />
+        <result column="rent_start_day" property="rentStartDay" />
+        <result column="rent_end_day" property="rentEndDay" />
+        <result column="rent_money" property="rentMoney" />
+        <result column="cur_elec_num" property="curElecNum" />
+        <result column="last_elec_num" property="lastElecNum" />
+        <result column="elec_price" property="elecPrice" />
+        <result column="elec_money" property="elecMoney" />
+        <result column="people_count" property="peopleCount" />
+        <result column="water_money" property="waterMoney" />
+        <result column="internet_money" property="internetMoney" />
+        <result column="note" property="note" />
+        <result column="signature" property="signature" />
+        <result column="sum_money" property="sumMoney" />
+        <result column="deposit" property="deposit" />
+        <result column="create_time" property="createTime" />
+        <result column="update_time" property="updateTime" />
+        <result column="del_flag" property="delFlag" />
+    </resultMap>
+
+</mapper>

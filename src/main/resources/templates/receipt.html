@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>房租收据</title>
+  <style>
+    .re-whole {
+      margin: auto;
+      width: 700px;
+      height: 340px;
+      background-color: #F8E1DB;
+    }
+    h3 {
+      text-align: center;
+      padding-top: 10px;
+      /*border-bottom: 1px solid #000;*/
+    }
+    .top,.re-middle,.re-bottom {
+      width: 90%;
+      margin: auto;
+    }
+    table {
+      /*合并边框*/
+      border-collapse: collapse;
+      width: 100%;
+      margin: auto;
+    }
+    th, td {
+      /*设置单元格边框为黑色实线*/
+      border: 1px solid black;
+      /*设置内边距*/
+      padding: 5px;
+    }
+  </style>
+</head>
+<body>
+  <div class="re-whole">
+  <h3>真南路648弄66号电子房租收据</h3>
+    <div class="top">
+      <p>房间：<strong>${roomNum}</strong>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${year?c}&nbsp;年&nbsp;${month}&nbsp;月&nbsp;${day}&nbsp;日</p>
+    </div>
+    <div class="re-middle">
+      <table>
+        <tr>
+          <td>房租(元)：${rentMoney}</td>
+          <td>起始日期：${rentStartDay}</td>
+          <td>截止日期：${rentEndDay}</td>
+        </tr>
+        <tr>
+          <td>期初电表度数：${lastElecNum}</td>
+          <td>期末电表度数：${curElecNum}</td>
+          <td>电费(元/度)：${elecPrice}</td>
+        </tr>
+        <tr>
+          <td>水费(元)：${waterMoney} * ${peopleCount} = ${waterMoneyCount}</td>
+          <td>网费(元)：${internetMoney}</td>
+          <td>电费(元)：(${curElecNum} - ${lastElecNum}) * ${elecPrice} = ${elecMoney}</td>
+        </tr>
+      </table>
+    </div>
+    <div class="re-bottom">
+      <p>总和：${rentMoney} + ${waterMoneyCount} + ${internetMoney} + ${elecMoney} = ${sumMoney}元</p>
+      <p>备注：${note}</p>
+      <p>收款人：${signature}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        金额合计(元)：${sumMoneyWithDeposit}</p>
+    </div>
+  </div>
+</body>
+</html>
