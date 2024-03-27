@@ -11,6 +11,9 @@ public class ReceiptVO {
     //租户ID
     private String tenantId;
 
+    //用户ID
+    private String userId;
+
     //租户姓名
     private String tenantName;
 

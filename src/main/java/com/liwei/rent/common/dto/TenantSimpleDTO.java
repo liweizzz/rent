@@ -6,4 +6,5 @@ import lombok.Data;
 public class TenantSimpleDTO {
     private String tenantId;
     private String tenantName;
+    private String roomNum;
 }

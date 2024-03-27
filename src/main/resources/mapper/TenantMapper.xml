@@ -24,4 +24,11 @@
         select tenant_id from tenant order by id desc limit 1
     </select>
 
+    <select id="getAllTenantSimpleData" resultType="com.liwei.rent.common.dto.TenantSimpleDTO" parameterType="java.lang.String">
+        SELECT t.tenant_id,t.tenant_name,trd.room_num
+        FROM tenant t
+            JOIN tenant_rent_detail trd on t.tenant_id = trd.tenant_id
+        WHERE apartment_id = #{apartmentId}
+    </select>
+
 </mapper>

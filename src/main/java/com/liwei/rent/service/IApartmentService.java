@@ -17,5 +17,5 @@ import java.util.List;
  */
 public interface IApartmentService extends IService<Apartment> {
     void saveOrUpdateApartment(ApartmentVO apartmentVO);
-    List<ApartmentDTO> listApartmentByUserId(String landlordId);
+    List<ApartmentDTO> listApartmentByUserId(String userId);
 }

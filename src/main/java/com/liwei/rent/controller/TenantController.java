@@ -73,16 +73,7 @@ public class TenantController {
      */
     @GetMapping(value = "/listAllTenantFromApartment")
     public Result<List<TenantSimpleDTO>> listAllTenantFromApartment(String apartmentId){
-        LambdaQueryWrapper<Tenant> cond = new LambdaQueryWrapper<>();
-        cond.eq(Tenant::getApartmentId,apartmentId);
-        List<Tenant> list = tenantService.list(cond);
-        List<TenantSimpleDTO> resultList = new ArrayList<>();
-        list.forEach(tenant -> {
-            TenantSimpleDTO tenantSimpleDTO = new TenantSimpleDTO();
-            BeanUtils.copyProperties(tenant,tenantSimpleDTO);
-            resultList.add(tenantSimpleDTO);
-        });
-        return Result.build(resultList);
+        return Result.build(tenantService.getAllTenantSimpleData(apartmentId));
     }
 
 }

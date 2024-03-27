@@ -1,31 +1,38 @@
 package com.liwei.rent.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
 import com.liwei.rent.common.Enum.DelFlagEnum;
+import com.liwei.rent.common.Enum.ErrorCodeEnum;
+import com.liwei.rent.common.dto.ApartmentDTO;
+import com.liwei.rent.common.exception.RentException;
 import com.liwei.rent.dao.ReceiptMapper;
 import com.liwei.rent.common.dto.ReceiptDTO;
 import com.liwei.rent.common.vo.PageVO;
 import com.liwei.rent.common.vo.ReceiptVO;
 import com.liwei.rent.entity.Receipt;
+import com.liwei.rent.service.IApartmentService;
 import com.liwei.rent.service.IReceiptService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import gui.ava.html.Html2Image;
 import jodd.io.FileUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
 import java.math.BigDecimal;
-import java.text.DateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -37,9 +44,12 @@ import java.util.Map;
  * @since 2024-02-18
  */
 @Service
+@Slf4j
 public class ReceiptServiceImpl extends ServiceImpl<ReceiptMapper, Receipt> implements IReceiptService {
     @Value("${receipt.folderPath}")
     private String receiptPath;
+    @Autowired
+    private IApartmentService apartmentService;
 
     @Override
     public void createReceipt(ReceiptVO receiptVO) {
@@ -170,6 +180,21 @@ public class ReceiptServiceImpl extends ServiceImpl<ReceiptMapper, Receipt> impl
 
     @Override
     public PageDTO<ReceiptDTO> listReceipt(ReceiptVO receiptVO, PageVO pageVO) {
+        String userId = receiptVO.getUserId();
+        if(StringUtils.isEmpty(userId)){
+            log.info("用户（房东）ID为空");
+            throw new RentException(ErrorCodeEnum.USER_ID_IS_NULL);
+        }
+        //设置公寓ID
+        String apartmentId = receiptVO.getApartmentId();
+        if(StringUtils.isEmpty(apartmentId)){
+            List<ApartmentDTO> apartmentDTOS = apartmentService.listApartmentByUserId(userId);
+            if(CollectionUtils.isEmpty(apartmentDTOS)){
+                log.info("此房东暂无公寓，房东ID：{}",userId);
+                return null;
+            }
+            apartmentId = apartmentDTOS.get(0).getApartmentId();
+        }
         PageDTO<ReceiptDTO> receiptDTOPageDTO = new PageDTO<>();
 
         PageDTO<Receipt> page = new PageDTO<>();
@@ -179,7 +204,7 @@ public class ReceiptServiceImpl extends ServiceImpl<ReceiptMapper, Receipt> impl
         if(receiptVO.getRoomNum() != null){
             cond.eq(Receipt::getRoomNum,receiptVO.getRoomNum());
         }
-        cond.eq(Receipt::getDelFlag,DelFlagEnum.UN_DEL.value());
+        cond.eq(Receipt::getApartmentId,apartmentId).eq(Receipt::getDelFlag,DelFlagEnum.UN_DEL.value());
         PageDTO<Receipt> receiptPageDTO = this.baseMapper.selectPage(page, cond);
         BeanUtils.copyProperties(receiptPageDTO,receiptDTOPageDTO);
         return receiptDTOPageDTO;

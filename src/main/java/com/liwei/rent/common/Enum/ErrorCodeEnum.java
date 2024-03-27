@@ -6,6 +6,8 @@ public enum ErrorCodeEnum {
     USER_LOCK(1003,"用户已锁定"),
     USER_NOT_EXIST(1004,"用户不存在"),
     USER_NO_TOKEN(1005,"用户未登录"),
+    USER_ID_IS_NULL(1006,"用户ID为空"),
+
     DIC_KEY_IS_NULL(2001,"字典key为空")
     ;
     private Integer code;
