@@ -7,6 +7,7 @@ import com.liwei.rent.common.Enum.DelFlagEnum;
 import com.liwei.rent.common.Enum.ErrorCodeEnum;
 import com.liwei.rent.common.Enum.UserStatusEnum;
 import com.liwei.rent.common.constant.RentConstant;
+import com.liwei.rent.common.dto.ApartmentDTO;
 import com.liwei.rent.common.dto.PrivilegeDTO;
 import com.liwei.rent.common.exception.RentException;
 import com.liwei.rent.common.utils.EncryptUtils;
@@ -19,13 +20,13 @@ import com.liwei.rent.entity.City;
 import com.liwei.rent.entity.Privilege;
 import com.liwei.rent.entity.Province;
 import com.liwei.rent.entity.User;
+import com.liwei.rent.service.IApartmentService;
 import com.liwei.rent.service.ICityService;
 import com.liwei.rent.service.IProvinceService;
 import com.liwei.rent.service.IUserService;
 import com.liwei.rent.common.utils.IdUtils;
 import com.liwei.rent.common.vo.UserVO;
 import com.liwei.rent.common.vo.PageVO;
-import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,7 +37,6 @@ import org.springframework.stereotype.Service;
 import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -61,6 +61,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
     private RedisUtils redisUtils;
     @Autowired
     private PrivilegeMapper privilegeMapper;
+    @Autowired
+    private IApartmentService apartmentService;
 
     @Override
     public void saveOrUpdateUser(UserVO userVO) {
@@ -183,6 +185,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
             //构建权限菜单树
             userBaseInfo.setPrivileges(this.buildMenuTree(privileges));
         }
+        //获取当前登录用户所有公寓
+        List<ApartmentDTO> apartmentDTOS = apartmentService.listApartmentByUserId(user.getUserId());
+        userBaseInfo.setApartments(apartmentDTOS);
         userBaseInfo.setUserId(user.getUserId());
         userBaseInfo.setUsername(user.getUserName());
         userBaseInfo.setToken(token);

@@ -11,4 +11,5 @@ public class UserBaseInfo {
     private String username;
     private List<Integer> roles;
     private List<PrivilegeDTO> privileges;
+    private List<ApartmentDTO> apartments;
 }
