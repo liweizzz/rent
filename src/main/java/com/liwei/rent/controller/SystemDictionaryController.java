@@ -36,7 +36,8 @@ public class SystemDictionaryController {
     public Result<List<SystemDictionaryDTO>> listDictionary(){
         LambdaQueryWrapper<SystemDictionary> cond = new LambdaQueryWrapper<>();
         cond.eq(SystemDictionary::getStatus, CommonStatusEnum.ON.value())
-                .eq(SystemDictionary::getDelFlag, DelFlagEnum.UN_DEL.value());
+                .eq(SystemDictionary::getDelFlag, DelFlagEnum.UN_DEL.value())
+                .orderByAsc(SystemDictionary::getItemValue);
         List<SystemDictionary> list = systemDictionaryService.list(cond);
         List<SystemDictionaryDTO> res = list.stream().map(x -> {
                     SystemDictionaryDTO dto = new SystemDictionaryDTO();

@@ -32,7 +32,7 @@ public class UserVO {
     /**
      * 所在省份编码
      */
-    private String provinceCode;
+    private String provinceId;
 
     /**
      * 所在城市编码

@@ -55,12 +55,12 @@ public class TenantRentDetail implements Serializable {
     /**
      * 房间号
      */
-    private Integer roomNum;
+    private String roomNum;
 
     /**
      * 合同ID
      */
-    private Integer contractId;
+    private String contractId;
 
     /**
      * 创建时间

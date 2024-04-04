@@ -94,10 +94,32 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         page.setCurrent(pageVO.getPageNum());
         page.setSize(pageVO.getPageSize());
         LambdaQueryWrapper<User> cond = new LambdaQueryWrapper<>();
-        if(userVO.getUserId() != null){
-            cond.eq(User::getUserId, userVO.getUserId());
+        //房东ID
+        if(StringUtils.isNotEmpty(userVO.getUserId())){
+            cond = cond.eq(User::getUserId, userVO.getUserId());
         }
-        cond.eq(User::getDelFlag,DelFlagEnum.UN_DEL.value());
+        //房东姓名
+        if(StringUtils.isNotEmpty(userVO.getUserName())){
+            cond = cond.eq(User::getUserName, userVO.getUserName());
+        }
+        //电话
+        if(StringUtils.isNotEmpty(userVO.getPhone())){
+            cond = cond.eq(User::getPhone, userVO.getPhone());
+        }
+        //省
+        if(StringUtils.isNotEmpty(userVO.getProvinceId())){
+            Province province = provinceService.getById(userVO.getProvinceId());
+            cond = cond.eq(User::getProvinceCode, province.getProvinceCode());
+        }
+        //城市
+        if(StringUtils.isNotEmpty(userVO.getCityCode())){
+            cond = cond.eq(User::getCityCode, userVO.getCityCode());
+        }
+        //状态
+        if(StringUtils.isNotEmpty(userVO.getStatus())){
+            cond = cond.eq(User::getDelFlag,userVO.getStatus());
+        }
+        cond.eq(User::getDelFlag,DelFlagEnum.UN_DEL);
         PageDTO<User> userPageDTO = this.getBaseMapper().selectPage(page, cond);
         List<User> userList = userPageDTO.getRecords();
         List<UserDTO> userDTOList = userList.stream()

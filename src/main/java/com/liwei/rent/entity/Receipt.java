@@ -91,7 +91,7 @@ public class Receipt implements Serializable {
     /**
      * 人数，用来统计总水费
      */
-    private Boolean peopleCount;
+    private Integer peopleCount;
 
     /**
      * 水费

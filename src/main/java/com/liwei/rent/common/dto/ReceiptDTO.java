@@ -73,6 +73,11 @@ public class ReceiptDTO {
     private BigDecimal waterMoney;
 
     /**
+     * 人数
+     */
+    private Integer peopleCount;
+
+    /**
      * 网费
      */
     private BigDecimal internetMoney;

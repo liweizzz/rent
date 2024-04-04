@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
 import com.liwei.rent.common.Enum.DelFlagEnum;
 import com.liwei.rent.common.Enum.TenantStatusEnum;
 import com.liwei.rent.common.dto.TenantSimpleDTO;
+import com.liwei.rent.dao.ApartmentMapper;
 import com.liwei.rent.entity.Tenant;
 import com.liwei.rent.dao.TenantMapper;
 import com.liwei.rent.service.ITenantService;
@@ -39,6 +40,8 @@ public class TenantServiceImpl extends ServiceImpl<TenantMapper, Tenant> impleme
 
     @Autowired
     private IdUtils idUtils;
+    @Autowired
+    private ApartmentMapper apartmentMapper;
 
     @Override
     public boolean saveOrUpdateTenant(TenantVO tenantVO) {
@@ -52,6 +55,8 @@ public class TenantServiceImpl extends ServiceImpl<TenantMapper, Tenant> impleme
             tenant = new Tenant();
             BeanUtils.copyProperties(tenantVO,tenant);
             tenant.setTenantId(idUtils.generateTenantId(tenantVO.getUserId()));
+            //设置公寓名称
+            tenant.setApartmentName(apartmentMapper.getApartmentName(tenantVO.getApartmentId()));
             tenant.setDelFlag(DelFlagEnum.UN_DEL.value());
             tenant.setStatus(TenantStatusEnum.ON_RENT.value());
             tenant.setCreateTime(DateUtils.getDate());

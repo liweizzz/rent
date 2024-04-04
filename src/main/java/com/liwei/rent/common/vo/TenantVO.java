@@ -45,7 +45,4 @@ public class TenantVO implements Serializable {
     @ApiModelProperty(value = "所属公寓ID")
     private String apartmentId;
 
-    @ApiModelProperty(value = "所属公寓名称")
-    private String apartmentCode;
-
 }

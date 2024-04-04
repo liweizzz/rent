@@ -17,4 +17,7 @@
         select apartment_id from apartment order by id desc limit 1;
     </select>
 
+    <select id="getApartmentName" resultType="string">
+        select apartment_name from apartment where apartment_id = #{apartmentId} and del_flag = 0;
+    </select>
 </mapper>

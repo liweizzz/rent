@@ -13,4 +13,5 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
  */
 public interface ApartmentMapper extends BaseMapper<Apartment> {
     String getLatestApartmentId();
+    String getApartmentName(String apartmentId);
 }
