@@ -1,5 +1,6 @@
 package com.liwei.rent.common.Enum;
 
+import com.liwei.rent.entity.Receipt;
 import com.liwei.rent.entity.Tenant;
 
 public enum ErrorCodeEnum {
@@ -13,7 +14,9 @@ public enum ErrorCodeEnum {
 
     DIC_KEY_IS_NULL(2001,"字典key为空"),
 
-    TENANT_ROOM_BIND(3001,"租户已绑定房间")
+    TENANT_ROOM_BIND(3001,"租户已绑定房间"),
+
+    RECEIPT_CUR_ELECNUM_ISNULL(4001,"期末电表度数为空")
     ;
     private Integer code;
     private String message;

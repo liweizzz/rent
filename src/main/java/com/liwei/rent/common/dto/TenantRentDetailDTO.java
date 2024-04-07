@@ -1,23 +1,33 @@
 package com.liwei.rent.common.dto;
 
-import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Data
-public class RoomDTO {
+public class TenantRentDetailDTO {
     private Integer id;
 
     /**
-     * 公寓ID
+     * 用户ID
      */
-    private String apartmentId;
+    private String tenantId;
 
     /**
-     * 公寓名称
+     * 起租日期
      */
-    private String apartmentName;
+    private LocalDate rentStartDay;
+
+    /**
+     * 退租日期
+     */
+    private LocalDate rentEndDay;
+
+    /**
+     * 租房状态 0：在租 1：已退租
+     */
+    private Integer rentStatus;
 
     /**
      * 房间号
@@ -25,9 +35,9 @@ public class RoomDTO {
     private String roomNum;
 
     /**
-     * 备注
+     * 合同ID
      */
-    private String note;
+    private String contractId;
 
     /**
      * 创建时间
@@ -40,8 +50,7 @@ public class RoomDTO {
     private LocalDateTime updateTime;
 
     /**
-     * 删除标记 0：未删除，1：已删除
+     * 删除标记 0：未删除 1：已删除
      */
     private Integer delFlag;
-
 }

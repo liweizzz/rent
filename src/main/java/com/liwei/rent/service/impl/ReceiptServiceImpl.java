@@ -7,6 +7,7 @@ import com.liwei.rent.common.Enum.DelFlagEnum;
 import com.liwei.rent.common.Enum.ErrorCodeEnum;
 import com.liwei.rent.common.dto.ApartmentDTO;
 import com.liwei.rent.common.exception.RentException;
+import com.liwei.rent.common.utils.DateUtils;
 import com.liwei.rent.dao.ReceiptMapper;
 import com.liwei.rent.common.dto.ReceiptDTO;
 import com.liwei.rent.common.vo.PageVO;
@@ -31,6 +32,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -53,6 +55,7 @@ public class ReceiptServiceImpl extends ServiceImpl<ReceiptMapper, Receipt> impl
 
     @Override
     public void createReceipt(ReceiptVO receiptVO) {
+        this.vaildParam(receiptVO);
         //租金
         BigDecimal rentMoney = new BigDecimal(receiptVO.getRentMoney());
         //押金
@@ -79,6 +82,15 @@ public class ReceiptServiceImpl extends ServiceImpl<ReceiptMapper, Receipt> impl
         //生成收据
         fillReceipt(receiptVO,waterMoneyCount,elecMoney,sumMoney,sumMoneyWithDeposit);
         //保存数据库
+        LambdaQueryWrapper<Receipt> cond = new LambdaQueryWrapper<>();
+        cond.eq(Receipt::getTenantId,receiptVO.getTenantId()).likeRight(Receipt::getCreateTime,DateUtils.getCurYearAndMonth());
+        Receipt oldReceipt = this.getOne(cond);
+        //本月存在该租户，该房间下的收据，更新
+        if(oldReceipt != null){
+            BeanUtils.copyProperties(receiptVO,oldReceipt,"id");
+            this.updateById(oldReceipt);
+            return;
+        }
         Receipt receipt = new Receipt();
         BeanUtils.copyProperties(receiptVO,receipt);
         LocalDateTime now = LocalDateTime.now();
@@ -92,6 +104,12 @@ public class ReceiptServiceImpl extends ServiceImpl<ReceiptMapper, Receipt> impl
         receipt.setUpdateTime(now);
         receipt.setDelFlag(DelFlagEnum.UN_DEL.value());
         this.save(receipt);
+    }
+
+    private void vaildParam(ReceiptVO receiptVO){
+        if(receiptVO.getCurElecNum() == null || receiptVO.getCurElecNum() == 0){
+            throw new RentException(ErrorCodeEnum.RECEIPT_CUR_ELECNUM_ISNULL);
+        }
     }
 
     /**
@@ -201,8 +219,11 @@ public class ReceiptServiceImpl extends ServiceImpl<ReceiptMapper, Receipt> impl
         page.setCurrent(pageVO.getPageNum());
         page.setSize(pageVO.getPageSize());
         LambdaQueryWrapper<Receipt> cond = new LambdaQueryWrapper<>();
-        if(receiptVO.getRoomNum() != null){
-            cond.eq(Receipt::getRoomNum,receiptVO.getRoomNum());
+        if(StringUtils.isNotEmpty(receiptVO.getRoomNum())){
+            cond = cond.eq(Receipt::getRoomNum,receiptVO.getRoomNum());
+        }
+        if(StringUtils.isNotEmpty(receiptVO.getMonth())){
+            cond.likeRight(Receipt::getCreateTime,receiptVO.getMonth());
         }
         cond.eq(Receipt::getApartmentId,apartmentId).eq(Receipt::getDelFlag,DelFlagEnum.UN_DEL.value());
         PageDTO<Receipt> receiptPageDTO = this.baseMapper.selectPage(page, cond);

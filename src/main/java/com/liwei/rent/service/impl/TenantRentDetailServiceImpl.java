@@ -1,6 +1,5 @@
 package com.liwei.rent.service.impl;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.liwei.rent.common.Enum.DelFlagEnum;
 import com.liwei.rent.common.Enum.ErrorCodeEnum;
@@ -42,15 +41,13 @@ public class TenantRentDetailServiceImpl extends ServiceImpl<TenantRentDetailMap
         this.saveOrUpdate(tenantRentDetail);
     }
 
+    /**
+     * 检查租户是否已绑定房间
+     * @param tenantId
+     * @return
+     */
     public boolean checkRoomHashTenant(String tenantId){
-        LambdaQueryWrapper<TenantRentDetail> cond = new LambdaQueryWrapper<>();
-        cond.eq(TenantRentDetail::getTenantId,tenantId)
-                .eq(TenantRentDetail::getDelFlag, DelFlagEnum.UN_DEL);
-        TenantRentDetail one = this.getOne(cond);
-        if(one != null){
-            return true;
-        }
-        return false;
+        return this.lambdaQuery().eq(TenantRentDetail::getTenantId,tenantId).eq(TenantRentDetail::getDelFlag, DelFlagEnum.UN_DEL).exists();
     }
 
 }

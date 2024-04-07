@@ -87,4 +87,9 @@ public class ReceiptVO {
      */
     private String signature;
 
+    /**
+     * 月份
+     */
+    private String month;
+
 }
