@@ -15,6 +15,7 @@ public enum ErrorCodeEnum {
     DIC_KEY_IS_NULL(2001,"字典key为空"),
 
     TENANT_ROOM_BIND(3001,"租户已绑定房间"),
+    TENANT_IS_NOT_EXIST(3002,"租户不存在"),
 
     RECEIPT_CUR_ELECNUM_ISNULL(4001,"期末电表度数为空")
     ;

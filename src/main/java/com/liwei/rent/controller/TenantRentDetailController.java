@@ -37,7 +37,9 @@ public class TenantRentDetailController {
     public Result<TenantRentDetailDTO> getTenantRentDetailByTId(@RequestParam String tenantId){
         TenantRentDetailDTO rentDetailDTO = new TenantRentDetailDTO();
         TenantRentDetail entity = tenantRentDetailService.lambdaQuery().eq(TenantRentDetail::getTenantId,tenantId).one();
-        BeanUtils.copyProperties(entity,rentDetailDTO);
+        if(entity != null){
+            BeanUtils.copyProperties(entity,rentDetailDTO);
+        }
         return Result.build(rentDetailDTO);
     }
 }

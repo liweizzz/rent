@@ -23,7 +23,7 @@ public class IdUtils {
     private DistributedRedisLock redisLock;
 
     /**
-     * 自动生成房东(用户)Id：L***
+     * 自动生成房东(用户)Id：U***
      * @return
      */
     public String generateUserId(){
@@ -43,17 +43,17 @@ public class IdUtils {
                 redisLock.unlock(RentConstant.USER_ID_LOCK_KEY);
             }
         }
-        return "L" + format;
+        return "U" + format;
     }
 
     /**
-     * 自动生成tenantId：L***-T***
+     * 自动生成tenantId：U***-T***
      * @param userId
      * @return
      */
     public String generateTenantId(String userId){
         String format;
-        String key = userId + RentConstant.TENANT_ID_KEY;
+        String key = RentConstant.TENANT_ID_KEY + userId;
         if(redisUtils.existKey(key)){
             Long increment = redisUtils.increment(key, 1);
             format = String.format("%02d", increment);
@@ -68,8 +68,8 @@ public class IdUtils {
     }
 
     /**
-     * 自动生成公寓ID：L***-A**
-     * @param landlordId
+     * 自动生成公寓ID：U***-A**
+     * @param userId
      * @return
      */
     public String generateApartmentId(String userId){

@@ -21,4 +21,6 @@ public interface ITenantService extends IService<Tenant> {
     PageDTO<Tenant> listTenant(TenantVO tenantVO, PageVO pageVO);
     boolean saveOrUpdateTenant(TenantVO tenantVO);
     List<TenantSimpleDTO> getAllTenantSimpleData(String apartmentId);
+    //删除租户
+    void delTenant(Integer id);
 }
