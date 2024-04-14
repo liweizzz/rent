@@ -18,16 +18,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 import javax.imageio.ImageIO;
-import javax.servlet.http.HttpServletResponse;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.OutputStream;
 
 /**
  * <p>
@@ -85,37 +82,16 @@ public class ReceiptController {
                 .eq(Receipt::getDelFlag,DelFlagEnum.UN_DEL)
                 .orderByDesc(Receipt::getCreateTime).last("limit 1").one();
         ReceiptDTO res = new ReceiptDTO();
-        BeanUtils.copyProperties(receipt,res);
+        if(receipt != null){
+            BeanUtils.copyProperties(receipt,res);
+        }
         return Result.build(res);
     }
 
     @GetMapping(value = "/getReceiptImg")
-    public Result<Void> getReceipt(Integer id, HttpServletResponse response) throws IOException {
-        Receipt receipt = receiptService.getById(id);
-        if(receipt == null){
-            throw new RentException(ErrorCodeEnum.RECEIPT_IS_NOT_EXIST);
-        }
-        String roomNum = receipt.getRoomNum();
-        String url = receiptUrl + DateUtils.getStrDateTime(receipt.getCreateTime()) + "/" + roomNum + ".png";
-        // 读取图片
-        BufferedImage image = ImageIO.read(new File(url));
-        if (image == null) {
-            response.sendError(HttpServletResponse.SC_NOT_FOUND);
-            return Result.ok();
-        }
-        // 将BufferedImage转换为byte数组
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        ImageIO.write(image, "png", baos); // 假设返回的是jpg格式的图片
-        byte[] imageBytes = baos.toByteArray();
-        // 设置响应头
-        response.setContentType(MediaType.IMAGE_PNG_VALUE);
-        response.setContentLength(imageBytes.length);
-        // 写入响应流
-        try (OutputStream outputStream = response.getOutputStream()) {
-            outputStream.write(imageBytes);
-            outputStream.flush();
-        }
-        return Result.ok();
+    public Result<byte[]> getReceiptImg(Integer id){
+        byte[] receiptImg = receiptService.getReceiptImg(id);
+        return Result.build(receiptImg);
     }
 
 }

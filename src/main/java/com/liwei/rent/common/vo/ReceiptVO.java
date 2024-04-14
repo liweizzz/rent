@@ -89,4 +89,9 @@ public class ReceiptVO {
      */
     private String month;
 
+    /**
+     * 用户姓名
+     */
+    private String userName;
+
 }

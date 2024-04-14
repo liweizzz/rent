@@ -6,10 +6,12 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
 import com.liwei.rent.common.dto.Result;
 import com.liwei.rent.common.dto.TenantDTO;
 import com.liwei.rent.common.dto.TenantSimpleDTO;
+import com.liwei.rent.common.utils.IdUtils;
 import com.liwei.rent.entity.Tenant;
 import com.liwei.rent.service.ITenantService;
 import com.liwei.rent.common.vo.PageVO;
 import com.liwei.rent.common.vo.TenantVO;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
@@ -46,6 +48,12 @@ public class TenantController {
         logger.info("查询租户列表入参：{}", JSON.toJSONString(tenantVO));
         PageDTO<TenantDTO> res = new PageDTO<>();
         PageDTO<Tenant> tenantPage = tenantService.listTenant(tenantVO, pageVO);
+        //对身份证进行掩码
+        tenantPage.getRecords().forEach(tenant -> {
+            if(StringUtils.isNotEmpty(tenant.getIdCard())){
+                tenant.setIdCard(IdUtils.maskIdCard(tenant.getIdCard()));
+            }
+        });
         BeanUtils.copyProperties(tenantPage,res);
         return Result.build(res);
     }

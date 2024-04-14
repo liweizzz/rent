@@ -8,6 +8,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 @Component
 public class IdUtils {
 
@@ -86,6 +89,16 @@ public class IdUtils {
             format = String.format("%02d", num);
         }
         return userId+"-A" + format;
+    }
+
+    public static String maskIdCard(String idCard){
+        Pattern pattern = Pattern.compile("(\\d{10})(\\d{4})(.*)");
+        Matcher matcher = pattern.matcher(idCard);
+        if (matcher.matches()) {
+            // 使用星号替换匹配到的中间4位，并保留其他部分
+            return matcher.replaceFirst(matcher.group(1) + "****" + matcher.group(3));
+        }
+        return null;
     }
 
 }

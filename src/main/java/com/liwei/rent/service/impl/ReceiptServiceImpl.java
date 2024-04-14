@@ -1,18 +1,16 @@
 package com.liwei.rent.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
 import com.liwei.rent.common.Enum.DelFlagEnum;
 import com.liwei.rent.common.Enum.ErrorCodeEnum;
-import com.liwei.rent.common.dto.ApartmentDTO;
 import com.liwei.rent.common.exception.RentException;
+import com.liwei.rent.common.utils.DateUtils;
 import com.liwei.rent.dao.ReceiptMapper;
 import com.liwei.rent.common.dto.ReceiptDTO;
 import com.liwei.rent.common.vo.PageVO;
 import com.liwei.rent.common.vo.ReceiptVO;
 import com.liwei.rent.entity.Receipt;
-import com.liwei.rent.service.IApartmentService;
 import com.liwei.rent.service.IReceiptService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import freemarker.template.Configuration;
@@ -22,17 +20,20 @@ import jodd.io.FileUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
 import java.io.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * <p>
@@ -99,7 +100,7 @@ public class ReceiptServiceImpl extends ServiceImpl<ReceiptMapper, Receipt> impl
     }
 
     private void vaildParam(ReceiptVO receiptVO){
-        if(receiptVO.getCurElecNum() == null || receiptVO.getCurElecNum() == 0){
+        if(receiptVO.getCurElecNum() == null || receiptVO.getCurElecNum() < 0){
             throw new RentException(ErrorCodeEnum.RECEIPT_CUR_ELECNUM_ISNULL);
         }
     }
@@ -190,9 +191,7 @@ public class ReceiptServiceImpl extends ServiceImpl<ReceiptMapper, Receipt> impl
 
     @Override
     public PageDTO<ReceiptDTO> listReceipt(ReceiptVO receiptVO, PageVO pageVO) {
-        //设置公寓ID
         PageDTO<ReceiptDTO> receiptDTOPageDTO = new PageDTO<>();
-
         PageDTO<Receipt> page = new PageDTO<>();
         page.setCurrent(pageVO.getPageNum());
         page.setSize(pageVO.getPageSize());
@@ -203,10 +202,58 @@ public class ReceiptServiceImpl extends ServiceImpl<ReceiptMapper, Receipt> impl
         if(StringUtils.isNotEmpty(receiptVO.getMonth())){
             cond.likeRight(Receipt::getCreateTime,receiptVO.getMonth());
         }
-        cond.eq(Receipt::getApartmentId,receiptVO.getApartmentId()).eq(Receipt::getDelFlag,DelFlagEnum.UN_DEL.value());
+        //设置公寓ID
+        cond.eq(Receipt::getApartmentId,receiptVO.getApartmentId())
+                .eq(Receipt::getDelFlag,DelFlagEnum.UN_DEL.value())
+                .orderByDesc(Receipt::getCreateTime).orderByAsc(Receipt::getRoomNum);
         PageDTO<Receipt> receiptPageDTO = this.baseMapper.selectPage(page, cond);
+        List<ReceiptDTO> collect = receiptPageDTO.getRecords().stream().map(receipt -> {
+            ReceiptDTO receiptDTO = new ReceiptDTO();
+            BeanUtils.copyProperties(receipt,receiptDTO);
+            return receiptDTO;
+        }).collect(Collectors.toList());
         BeanUtils.copyProperties(receiptPageDTO,receiptDTOPageDTO);
+        receiptDTOPageDTO.setRecords(collect);
         return receiptDTOPageDTO;
+    }
+
+    @Override
+    public byte[] getReceiptImg(Integer id) {
+        Receipt receipt = this.getById(id);
+        if(receipt == null){
+            throw new RentException(ErrorCodeEnum.RECEIPT_IS_NOT_EXIST);
+        }
+        String roomNum = receipt.getRoomNum();
+        String url = receiptPath + DateUtils.getStrDateTime(receipt.getCreateTime()) + "/" + roomNum + ".png";
+        // 读取图片
+        BufferedImage image;
+        try {
+            image = ImageIO.read(new File(url));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        if (image == null) {
+            throw new RentException(ErrorCodeEnum.RECEIPT_IS_NOT_EXIST);
+        }
+        // 将BufferedImage转换为byte数组
+        ByteArrayOutputStream bos = null;
+        byte[] imageBytes;
+        try {
+            bos = new ByteArrayOutputStream();
+            ImageIO.write(image, "png", bos);
+            imageBytes = bos.toByteArray();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        } finally {
+            if(bos != null){
+                try {
+                    bos.close();
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
+        return imageBytes;
     }
 
 }

@@ -18,4 +18,6 @@ import com.baomidou.mybatisplus.extension.service.IService;
 public interface IReceiptService extends IService<Receipt> {
     void createReceipt(ReceiptVO receiptVO);
     PageDTO<ReceiptDTO> listReceipt(ReceiptVO receiptVO, PageVO pageVO);
+    //获取收据图片
+    byte[] getReceiptImg(Integer id);
 }
