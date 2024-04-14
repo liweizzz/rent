@@ -13,5 +13,5 @@ import com.baomidou.mybatisplus.extension.service.IService;
  * @since 2024-01-04
  */
 public interface ITenantRentDetailService extends IService<TenantRentDetail> {
-    void saveTenantRentDetail(TenantRentDetailVO tenantRentDetailVO);
+    void saveOrUpdateTenantRentDetail(TenantRentDetailVO tenantRentDetailVO);
 }

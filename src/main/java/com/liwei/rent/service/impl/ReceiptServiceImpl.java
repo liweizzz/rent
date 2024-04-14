@@ -7,7 +7,6 @@ import com.liwei.rent.common.Enum.DelFlagEnum;
 import com.liwei.rent.common.Enum.ErrorCodeEnum;
 import com.liwei.rent.common.dto.ApartmentDTO;
 import com.liwei.rent.common.exception.RentException;
-import com.liwei.rent.common.utils.DateUtils;
 import com.liwei.rent.dao.ReceiptMapper;
 import com.liwei.rent.common.dto.ReceiptDTO;
 import com.liwei.rent.common.vo.PageVO;
@@ -32,9 +31,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -50,8 +47,6 @@ import java.util.Map;
 public class ReceiptServiceImpl extends ServiceImpl<ReceiptMapper, Receipt> implements IReceiptService {
     @Value("${receipt.folderPath}")
     private String receiptPath;
-    @Autowired
-    private IApartmentService apartmentService;
 
     @Override
     public void createReceipt(ReceiptVO receiptVO) {
@@ -82,28 +77,25 @@ public class ReceiptServiceImpl extends ServiceImpl<ReceiptMapper, Receipt> impl
         //生成收据
         fillReceipt(receiptVO,waterMoneyCount,elecMoney,sumMoney,sumMoneyWithDeposit);
         //保存数据库
-        LambdaQueryWrapper<Receipt> cond = new LambdaQueryWrapper<>();
-        cond.eq(Receipt::getTenantId,receiptVO.getTenantId()).likeRight(Receipt::getCreateTime,DateUtils.getCurYearAndMonth());
-        Receipt oldReceipt = this.getOne(cond);
-        //本月存在该租户，该房间下的收据，更新
-        if(oldReceipt != null){
-            BeanUtils.copyProperties(receiptVO,oldReceipt,"id");
-            this.updateById(oldReceipt);
-            return;
-        }
-        Receipt receipt = new Receipt();
-        BeanUtils.copyProperties(receiptVO,receipt);
         LocalDateTime now = LocalDateTime.now();
+        Receipt receipt;
+        if(receiptVO.getId() != null && receiptVO.getId() != 0){
+            //已存在该收据，更新
+            receipt = this.getById(receiptVO.getId());
+        }else {
+            receipt = new Receipt();
+            receipt.setDelFlag(DelFlagEnum.UN_DEL.value());
+            receipt.setCreateTime(now);
+        }
+        BeanUtils.copyProperties(receiptVO,receipt);
         receipt.setRentMoney(rentMoney);
         receipt.setElecPrice(elecPrice);
         receipt.setElecMoney(elecMoney);
         receipt.setWaterMoney(waterMoney);
         receipt.setInternetMoney(internetMoney);
         receipt.setSumMoney(sumMoney);
-        receipt.setCreateTime(now);
         receipt.setUpdateTime(now);
-        receipt.setDelFlag(DelFlagEnum.UN_DEL.value());
-        this.save(receipt);
+        this.saveOrUpdate(receipt);
     }
 
     private void vaildParam(ReceiptVO receiptVO){
@@ -198,21 +190,7 @@ public class ReceiptServiceImpl extends ServiceImpl<ReceiptMapper, Receipt> impl
 
     @Override
     public PageDTO<ReceiptDTO> listReceipt(ReceiptVO receiptVO, PageVO pageVO) {
-        String userId = receiptVO.getUserId();
-        if(StringUtils.isEmpty(userId)){
-            log.info("用户（房东）ID为空");
-            throw new RentException(ErrorCodeEnum.USER_ID_IS_NULL);
-        }
         //设置公寓ID
-        String apartmentId = receiptVO.getApartmentId();
-        if(StringUtils.isEmpty(apartmentId)){
-            List<ApartmentDTO> apartmentDTOS = apartmentService.listApartmentByUserId(userId);
-            if(CollectionUtils.isEmpty(apartmentDTOS)){
-                log.info("此房东暂无公寓，房东ID：{}",userId);
-                return null;
-            }
-            apartmentId = apartmentDTOS.get(0).getApartmentId();
-        }
         PageDTO<ReceiptDTO> receiptDTOPageDTO = new PageDTO<>();
 
         PageDTO<Receipt> page = new PageDTO<>();
@@ -225,7 +203,7 @@ public class ReceiptServiceImpl extends ServiceImpl<ReceiptMapper, Receipt> impl
         if(StringUtils.isNotEmpty(receiptVO.getMonth())){
             cond.likeRight(Receipt::getCreateTime,receiptVO.getMonth());
         }
-        cond.eq(Receipt::getApartmentId,apartmentId).eq(Receipt::getDelFlag,DelFlagEnum.UN_DEL.value());
+        cond.eq(Receipt::getApartmentId,receiptVO.getApartmentId()).eq(Receipt::getDelFlag,DelFlagEnum.UN_DEL.value());
         PageDTO<Receipt> receiptPageDTO = this.baseMapper.selectPage(page, cond);
         BeanUtils.copyProperties(receiptPageDTO,receiptDTOPageDTO);
         return receiptDTOPageDTO;

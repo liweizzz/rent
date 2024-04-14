@@ -27,27 +27,43 @@ import java.time.LocalDateTime;
 public class TenantRentDetailServiceImpl extends ServiceImpl<TenantRentDetailMapper, TenantRentDetail> implements ITenantRentDetailService {
 
     @Override
-    public void saveTenantRentDetail(TenantRentDetailVO tenantRentDetailVO) {
+    public void saveOrUpdateTenantRentDetail(TenantRentDetailVO tenantRentDetailVO) {
         String tenantId = tenantRentDetailVO.getTenantId();
-        if(this.checkRoomHashTenant(tenantId)){
-            log.info("租户已绑定房间，tenantId:{},roomNum:{}",tenantId,tenantRentDetailVO.getRoomNum());
+        String roomNum = tenantRentDetailVO.getRoomNum();
+        if(this.checkRoomHashTenant(roomNum,tenantId)){
             throw new RentException(ErrorCodeEnum.TENANT_ROOM_BIND);
         }
-        TenantRentDetail tenantRentDetail = new TenantRentDetail();
+        TenantRentDetail one = this.lambdaQuery().eq(TenantRentDetail::getTenantId, tenantId)
+                .eq(TenantRentDetail::getDelFlag, DelFlagEnum.UN_DEL).one();
+        TenantRentDetail tenantRentDetail;
+        if(one == null){
+            //新增
+            tenantRentDetail = new TenantRentDetail();
+            tenantRentDetail.setCreateTime(LocalDateTime.now());
+            tenantRentDetail.setUpdateTime(LocalDateTime.now());
+            tenantRentDetail.setDelFlag(DelFlagEnum.UN_DEL.value());
+        }else {
+            //修改
+            tenantRentDetail = one;
+            tenantRentDetail.setUpdateTime(LocalDateTime.now());
+        }
         BeanUtils.copyProperties(tenantRentDetailVO,tenantRentDetail);
-        tenantRentDetail.setCreateTime(LocalDateTime.now());
-        tenantRentDetail.setUpdateTime(LocalDateTime.now());
-        tenantRentDetail.setDelFlag(DelFlagEnum.UN_DEL.value());
         this.saveOrUpdate(tenantRentDetail);
     }
 
     /**
-     * 检查租户是否已绑定房间
+     * 检查房间是否已绑定其他租户
+     * @param roomNum
      * @param tenantId
-     * @return
+     * @return true:已绑定，false：未绑定
      */
-    public boolean checkRoomHashTenant(String tenantId){
-        return this.lambdaQuery().eq(TenantRentDetail::getTenantId,tenantId).eq(TenantRentDetail::getDelFlag, DelFlagEnum.UN_DEL).exists();
+    public boolean checkRoomHashTenant(String roomNum,String tenantId){
+        TenantRentDetail one = this.lambdaQuery().eq(TenantRentDetail::getRoomNum, roomNum)
+                .eq(TenantRentDetail::getDelFlag, DelFlagEnum.UN_DEL).one();
+        if(one == null || tenantId.equals(one.getTenantId())){
+            return false;
+        }
+        return true;
     }
 
 }

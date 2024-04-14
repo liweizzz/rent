@@ -29,7 +29,7 @@ public class TenantRentDetailController {
 
     @PostMapping(value = "/saveOrUpdate")
     public Result<Void> saveTenantRentDetail(@RequestBody TenantRentDetailVO tenantRentDetailVO){
-        tenantRentDetailService.saveTenantRentDetail(tenantRentDetailVO);
+        tenantRentDetailService.saveOrUpdateTenantRentDetail(tenantRentDetailVO);
         return Result.ok();
     }
 
