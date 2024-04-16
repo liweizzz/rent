@@ -91,6 +91,11 @@ public class IdUtils {
         return userId+"-A" + format;
     }
 
+    /**
+     * 身份证11-14位掩码
+     * @param idCard
+     * @return
+     */
     public static String maskIdCard(String idCard){
         Pattern pattern = Pattern.compile("(\\d{10})(\\d{4})(.*)");
         Matcher matcher = pattern.matcher(idCard);

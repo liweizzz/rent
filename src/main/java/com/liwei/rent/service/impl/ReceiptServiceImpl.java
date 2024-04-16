@@ -78,30 +78,12 @@ public class ReceiptServiceImpl extends ServiceImpl<ReceiptMapper, Receipt> impl
         //生成收据
         fillReceipt(receiptVO,waterMoneyCount,elecMoney,sumMoney,sumMoneyWithDeposit);
         //保存数据库
-        LocalDateTime now = LocalDateTime.now();
-        Receipt receipt;
-        if(receiptVO.getId() != null && receiptVO.getId() != 0){
-            //已存在该收据，更新
-            receipt = this.getById(receiptVO.getId());
-        }else {
-            receipt = new Receipt();
-            receipt.setDelFlag(DelFlagEnum.UN_DEL.value());
-            receipt.setCreateTime(now);
-        }
-        BeanUtils.copyProperties(receiptVO,receipt);
-        receipt.setRentMoney(rentMoney);
-        receipt.setElecPrice(elecPrice);
-        receipt.setElecMoney(elecMoney);
-        receipt.setWaterMoney(waterMoney);
-        receipt.setInternetMoney(internetMoney);
-        receipt.setSumMoney(sumMoney);
-        receipt.setUpdateTime(now);
-        this.saveOrUpdate(receipt);
+        this.saveToDB(receiptVO,rentMoney,elecPrice,elecMoney,waterMoney,internetMoney,sumMoney);
     }
 
     private void vaildParam(ReceiptVO receiptVO){
         if(receiptVO.getCurElecNum() == null || receiptVO.getCurElecNum() < 0){
-            throw new RentException(ErrorCodeEnum.RECEIPT_CUR_ELECNUM_ISNULL);
+            throw new RentException(ErrorCodeEnum.RECEIPT_CUR_ELECNUM_IS_ERROR);
         }
     }
 
@@ -110,7 +92,8 @@ public class ReceiptServiceImpl extends ServiceImpl<ReceiptMapper, Receipt> impl
      * @param elecMoney 电费
      * @param sumMoney 金额合计
      */
-    private void fillReceipt(ReceiptVO receiptVO,BigDecimal waterMoneyCount,BigDecimal elecMoney,BigDecimal sumMoney,BigDecimal sumMoneyWithDeposit){
+    private void fillReceipt(ReceiptVO receiptVO,BigDecimal waterMoneyCount,BigDecimal elecMoney,BigDecimal sumMoney,
+                             BigDecimal sumMoneyWithDeposit){
         // 配置 FreeMarker
         Configuration cfg = new Configuration(Configuration.VERSION_2_3_31);
         // 设置模板文件所在的目录
@@ -189,6 +172,32 @@ public class ReceiptServiceImpl extends ServiceImpl<ReceiptMapper, Receipt> impl
         }
     }
 
+    /**
+     * 保存数据库
+     */
+    private void saveToDB(ReceiptVO receiptVO,BigDecimal rentMoney,BigDecimal elecPrice,BigDecimal elecMoney,
+                          BigDecimal waterMoney,BigDecimal internetMoney,BigDecimal sumMoney){
+        LocalDateTime now = LocalDateTime.now();
+        Receipt receipt;
+        if(receiptVO.getId() != null && receiptVO.getId() != 0){
+            //已存在该收据，更新
+            receipt = this.getById(receiptVO.getId());
+        }else {
+            receipt = new Receipt();
+            receipt.setDelFlag(DelFlagEnum.UN_DEL.value());
+            receipt.setCreateTime(now);
+        }
+        BeanUtils.copyProperties(receiptVO,receipt);
+        receipt.setRentMoney(rentMoney);
+        receipt.setElecPrice(elecPrice);
+        receipt.setElecMoney(elecMoney);
+        receipt.setWaterMoney(waterMoney);
+        receipt.setInternetMoney(internetMoney);
+        receipt.setSumMoney(sumMoney);
+        receipt.setUpdateTime(now);
+        this.saveOrUpdate(receipt);
+    }
+
     @Override
     public PageDTO<ReceiptDTO> listReceipt(ReceiptVO receiptVO, PageVO pageVO) {
         PageDTO<ReceiptDTO> receiptDTOPageDTO = new PageDTO<>();
@@ -224,7 +233,7 @@ public class ReceiptServiceImpl extends ServiceImpl<ReceiptMapper, Receipt> impl
             throw new RentException(ErrorCodeEnum.RECEIPT_IS_NOT_EXIST);
         }
         String roomNum = receipt.getRoomNum();
-        String url = receiptPath + DateUtils.getStrDateTime(receipt.getCreateTime()) + "/" + roomNum + ".png";
+        String url = receiptPath + DateUtils.getStrDateTime(receipt.getUpdateTime()) + "/" + roomNum + ".png";
         // 读取图片
         BufferedImage image;
         try {

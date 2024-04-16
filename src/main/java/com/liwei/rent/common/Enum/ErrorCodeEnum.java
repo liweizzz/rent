@@ -17,7 +17,7 @@ public enum ErrorCodeEnum {
     TENANT_ROOM_BIND(3001,"房间已绑定租户"),
     TENANT_IS_NOT_EXIST(3002,"租户不存在"),
 
-    RECEIPT_CUR_ELECNUM_ISNULL(4001,"期末电表度数为空"),
+    RECEIPT_CUR_ELECNUM_IS_ERROR(4001,"期末电表度数错误！"),
 
     RECEIPT_IS_NOT_EXIST(5001,"收据不存在")
     ;
