@@ -16,14 +16,8 @@ import com.liwei.rent.dao.PrivilegeMapper;
 import com.liwei.rent.dao.UserMapper;
 import com.liwei.rent.common.dto.UserBaseInfo;
 import com.liwei.rent.common.dto.UserDTO;
-import com.liwei.rent.entity.City;
-import com.liwei.rent.entity.Privilege;
-import com.liwei.rent.entity.Province;
-import com.liwei.rent.entity.User;
-import com.liwei.rent.service.IApartmentService;
-import com.liwei.rent.service.ICityService;
-import com.liwei.rent.service.IProvinceService;
-import com.liwei.rent.service.IUserService;
+import com.liwei.rent.entity.*;
+import com.liwei.rent.service.*;
 import com.liwei.rent.common.utils.IdUtils;
 import com.liwei.rent.common.vo.UserVO;
 import com.liwei.rent.common.vo.PageVO;
@@ -63,6 +57,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
     private PrivilegeMapper privilegeMapper;
     @Autowired
     private IApartmentService apartmentService;
+    @Autowired
+    private IRoleService roleService;
 
     @Override
     public void saveOrUpdateUser(UserVO userVO) {
@@ -83,6 +79,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         }else {//修改
             user = this.getById(userVO.getId());
             BeanUtils.copyProperties(userVO,user);
+            user.setUpdateTime(new Date());
         }
         this.saveOrUpdate(user);
     }
@@ -107,9 +104,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
             cond = cond.eq(User::getPhone, userVO.getPhone());
         }
         //省
-        if(StringUtils.isNotEmpty(userVO.getProvinceId())){
-            Province province = provinceService.getById(userVO.getProvinceId());
-            cond = cond.eq(User::getProvinceCode, province.getProvinceCode());
+        if(StringUtils.isNotEmpty(userVO.getProvinceCode())){
+            cond = cond.eq(User::getProvinceCode, userVO.getProvinceCode());
         }
         //城市
         if(StringUtils.isNotEmpty(userVO.getCityCode())){
@@ -127,11 +123,15 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
                     UserDTO userDTO = new UserDTO();
                     BeanUtils.copyProperties(user, userDTO);
                     // 转换省份
-                    Province province = provinceService.getOne(new LambdaQueryWrapper<Province>().eq(Province::getProvinceCode, user.getProvinceCode()));
+                    Province province = provinceService.lambdaQuery().eq(Province::getProvinceCode, user.getProvinceCode()).one();
                     userDTO.setProvince(province != null ? province.getName() : null);
                     // 转换城市
-                    City city = cityService.getOne(new LambdaQueryWrapper<City>().eq(City::getCityCode, user.getCityCode()));
+                    City city = cityService.lambdaQuery().eq(City::getCityCode, user.getCityCode()).one();
                     userDTO.setCity(city != null ? city.getName() : null);
+                    if(StringUtils.isNotEmpty(user.getRoleId())){
+                        Role role = roleService.getById(user.getRoleId());
+                        userDTO.setRoleName(role.getRoleName());
+                    }
                     return userDTO;
                 }).collect(Collectors.toList());
         BeanUtils.copyProperties(userPageDTO,res,"records");
@@ -189,16 +189,34 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         }
     }
 
+    @Override
+    public UserDTO getUser(Integer id) {
+        UserDTO userDTO = new UserDTO();
+        User user = this.getById(id);
+        if(user != null){
+            BeanUtils.copyProperties(user,userDTO);
+            //转换省份
+            Province province = provinceService.getOne(new LambdaQueryWrapper<Province>().eq(Province::getProvinceCode, user.getProvinceCode()));
+            userDTO.setProvince(province != null ? province.getName() : null);
+            // 转换城市
+            City city = cityService.getOne(new LambdaQueryWrapper<City>().eq(City::getCityCode, user.getCityCode()));
+            userDTO.setCity(city != null ? city.getName() : null);
+            if(StringUtils.isNotEmpty(user.getRoleId())){
+                Role role = roleService.getById(user.getRoleId());
+                userDTO.setRoleName(role.getRoleName());
+            }
+        }
+        return userDTO;
+    }
+
     private UserBaseInfo wapperUserBaseInfo(User user,String token){
         UserBaseInfo userBaseInfo = new UserBaseInfo();
         //获取当前用户登录的角色
-        String roleIds = user.getRoleIds();
-        if(StringUtils.isNotEmpty(roleIds)){
-            String[] split = user.getRoleIds().split(",");
-            List<Integer> roles = Arrays.stream(split).map(Integer::valueOf).collect(Collectors.toList());
-            userBaseInfo.setRoles(roles);
+        String roleId = user.getRoleId();
+        if(StringUtils.isNotEmpty(roleId)){
+            userBaseInfo.setRoleId(roleId);
             //获取角色的所有权限
-            List<Privilege> privilegeList = privilegeMapper.getFromRoleIds(roles);
+            List<Privilege> privilegeList = privilegeMapper.getFromRoleIds(roleId);
             List<PrivilegeDTO> privileges = privilegeList.stream().map(x -> {
                 PrivilegeDTO privilegeDTO = new PrivilegeDTO();
                 BeanUtils.copyProperties(x, privilegeDTO);

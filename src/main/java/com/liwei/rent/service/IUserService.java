@@ -24,4 +24,11 @@ public interface IUserService extends IService<User> {
     UserBaseInfo login(String userName, String password);
     UserBaseInfo getUserInfo(String token);
     void logOut(HttpServletRequest httpRequest);
+
+    /**
+     * 通过用户Id获取用户信息
+     * @param id
+     * @return
+     */
+    UserDTO getUser(Integer id);
 }

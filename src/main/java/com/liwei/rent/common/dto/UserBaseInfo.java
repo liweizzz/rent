@@ -9,7 +9,7 @@ public class UserBaseInfo {
     private String token;
     private String userId;
     private String username;
-    private List<Integer> roles;
+    private String roleId;
     private List<PrivilegeDTO> privileges;
     private List<ApartmentDTO> apartments;
 }

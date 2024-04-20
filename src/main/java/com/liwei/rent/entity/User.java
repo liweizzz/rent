@@ -51,7 +51,7 @@ public class User implements Serializable {
     /**
      * 角色Id
      */
-    private String roleIds;
+    private String roleId;
 
     /**
      * 所在省份编码

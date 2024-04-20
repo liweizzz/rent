@@ -19,11 +19,8 @@
     </resultMap>
 
     <select id="getFromRoleIds" resultMap = "BaseResultMap">
-        select p.* from privilege p join role_privilege rp on p.id = rp.privilege_id where rp.role_id in
-        <foreach collection="roleIds" item="item" open="(" close=")" separator=",">
-            #{item}
-        </foreach>
-        and p.del_flag = 0 and rp.del_flag = 0
+        select p.* from privilege p join role_privilege rp on p.id = rp.privilege_id
+                   where rp.role_id = #{roleId} and p.del_flag = 0 and rp.del_flag = 0
     </select>
 
 </mapper>

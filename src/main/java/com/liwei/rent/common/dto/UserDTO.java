@@ -14,6 +14,9 @@ public class UserDTO {
     @ApiModelProperty(value = "用户姓名")
     private String userName;
 
+    @ApiModelProperty(value = "角色名称")
+    private String roleName;
+
     @ApiModelProperty(value = "身份证")
     private String idCard;
 

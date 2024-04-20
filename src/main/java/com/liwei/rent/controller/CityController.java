@@ -1,11 +1,12 @@
 package com.liwei.rent.controller;
 
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.liwei.rent.common.dto.CityDTO;
 import com.liwei.rent.common.dto.Result;
 import com.liwei.rent.entity.City;
+import com.liwei.rent.entity.Province;
 import com.liwei.rent.service.ICityService;
+import com.liwei.rent.service.IProvinceService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -29,12 +30,14 @@ import java.util.stream.Collectors;
 public class CityController {
     @Autowired
     private ICityService cityService;
+    @Autowired
+    private IProvinceService provinceService;
 
-    @GetMapping("/getAllCitysByProvinceId")
-    public Result<List<CityDTO>> getAllCitysByProvinceId(String provinceId){
-        LambdaQueryWrapper<City> cond = new LambdaQueryWrapper<>();
-        cond.eq(City::getProvinceId,provinceId);
-        List<City> list = cityService.list(cond);
+    @GetMapping("/getAllCitysByProvinceCode")
+    public Result<List<CityDTO>> getAllCitysByProvince(String provinceCode){
+        Province province = provinceService.lambdaQuery().eq(Province::getProvinceCode, provinceCode).one();
+        List<City> list = cityService.lambdaQuery().eq(City::getProvinceId, province.getId()).list();
+
         List<CityDTO> res = list.stream().map(x -> {
             CityDTO cityDTO = new CityDTO();
             BeanUtils.copyProperties(x, cityDTO);

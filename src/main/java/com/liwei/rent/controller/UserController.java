@@ -45,6 +45,12 @@ public class UserController {
         return Result.build(res);
     }
 
+    @GetMapping(value = "/get")
+    public Result<UserDTO> getUser(Integer id){
+        UserDTO res = userService.getUser(id);
+        return Result.build(res);
+    }
+
     @DeleteMapping(value = "del")
     public Result<Void> delete(Integer id){
         logger.info("删除用户，id：{}", id);

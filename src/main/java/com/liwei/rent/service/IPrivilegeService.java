@@ -1,10 +1,7 @@
 package com.liwei.rent.service;
 
-import com.liwei.rent.common.dto.PrivilegeDTO;
 import com.liwei.rent.entity.Privilege;
 import com.baomidou.mybatisplus.extension.service.IService;
-
-import java.util.List;
 
 /**
  * <p>

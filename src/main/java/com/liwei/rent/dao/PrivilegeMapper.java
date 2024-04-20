@@ -14,5 +14,5 @@ import java.util.List;
  * @since 2024-03-20
  */
 public interface PrivilegeMapper extends BaseMapper<Privilege> {
-    List<Privilege> getFromRoleIds(List<Integer> roleIds);
+    List<Privilege> getFromRoleIds(String roleId);
 }

@@ -27,12 +27,12 @@ public class UserVO {
     /**
      * 角色Id
      */
-    private List<Integer> roleIds;
+    private String roleId;
 
     /**
      * 所在省份编码
      */
-    private String provinceId;
+    private String provinceCode;
 
     /**
      * 所在城市编码
