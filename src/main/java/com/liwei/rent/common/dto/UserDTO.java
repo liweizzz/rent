@@ -14,6 +14,9 @@ public class UserDTO {
     @ApiModelProperty(value = "用户姓名")
     private String userName;
 
+    @ApiModelProperty(value = "角色ID")
+    private String roleId;
+
     @ApiModelProperty(value = "角色名称")
     private String roleName;
 
@@ -25,6 +28,9 @@ public class UserDTO {
 
     @ApiModelProperty(value = "所在城市")
     private String city;
+
+    @ApiModelProperty(value = "登录密码")
+    private String password;
 
     @ApiModelProperty(value = "详细地址")
     private String address;
