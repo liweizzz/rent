@@ -12,8 +12,10 @@ import com.liwei.rent.service.IRoleService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.CollectionUtils;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -35,7 +37,7 @@ public class RoleController {
     private IRolePrivilegeService rolePrivilegeService;
 
     @PostMapping(value = "/addOrUpdate")
-    public Result<Void> addOrUpdateRole(@RequestBody RoleVO roleVO){
+    public Result<Void> addOrUpdateRole(@Valid @RequestBody RoleVO roleVO){
         roleService.addOrUpdate(roleVO);
         return Result.ok();
     }

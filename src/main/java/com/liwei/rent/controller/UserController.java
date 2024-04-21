@@ -15,6 +15,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
+
 /**
  * <p>
  * 用户（房东）表 前端控制器
@@ -32,7 +34,7 @@ public class UserController {
     private IUserService userService;
 
     @PostMapping(value = "/saveOrUpdate")
-    public Result<Void> addOrUpdateUser(@RequestBody UserVO userVO){
+    public Result<Void> addOrUpdateUser(@Valid @RequestBody UserVO userVO){
         logger.info("新增/修改用户入参：{}", JSON.toJSONString(userVO));
         userService.saveOrUpdateUser(userVO);
         return Result.ok();

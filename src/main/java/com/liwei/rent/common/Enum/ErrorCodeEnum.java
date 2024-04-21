@@ -1,8 +1,5 @@
 package com.liwei.rent.common.Enum;
 
-import com.liwei.rent.entity.Receipt;
-import com.liwei.rent.entity.Tenant;
-
 public enum ErrorCodeEnum {
     USERNAME_OR_PASSWORD_NOT_CORRECT(1001,"用户名或密码错误"),
     USERNAME_OR_PASSWORD_IS_EMPTY(1002,"用户名或密码为空"),

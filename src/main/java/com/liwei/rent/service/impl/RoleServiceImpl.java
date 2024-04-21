@@ -59,22 +59,14 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements IR
 
     private void saveOrUpdateRolePrivilege(Integer roleId, List<Integer> privilegeIdList){
         LocalDateTime now = LocalDateTime.now();
+        rolePrivilegeService.lambdaUpdate().eq(RolePrivilege::getRoleId,roleId).remove();
         List<RolePrivilege> list = privilegeIdList.stream().map(privilegeId -> {
-            RolePrivilege rolePrivilege;
-            RolePrivilege one = rolePrivilegeService.lambdaQuery().eq(RolePrivilege::getRoleId, roleId)
-                    .eq(RolePrivilege::getPrivilegeId, privilegeId)
-                    .eq(RolePrivilege::getDelFlag, DelFlagEnum.UN_DEL.value())
-                    .one();
-            if (one != null) {
-                rolePrivilege = one;
-            } else {
-                rolePrivilege = new RolePrivilege();
-                rolePrivilege.setCreateTime(now);
-                rolePrivilege.setDelFlag(DelFlagEnum.UN_DEL.value());
-            }
+            RolePrivilege rolePrivilege = new RolePrivilege();
             rolePrivilege.setRoleId(roleId);
             rolePrivilege.setPrivilegeId(privilegeId);
+            rolePrivilege.setCreateTime(now);
             rolePrivilege.setUpdateTime(now);
+            rolePrivilege.setDelFlag(DelFlagEnum.UN_DEL.value());
             return rolePrivilege;
         }).collect(Collectors.toList());
         rolePrivilegeService.saveOrUpdateBatch(list);

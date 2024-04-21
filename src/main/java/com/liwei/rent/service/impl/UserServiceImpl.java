@@ -197,10 +197,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
             BeanUtils.copyProperties(user,userDTO);
             //转换省份
             Province province = provinceService.getOne(new LambdaQueryWrapper<Province>().eq(Province::getProvinceCode, user.getProvinceCode()));
-            userDTO.setProvince(province != null ? province.getName() : null);
+            userDTO.setProvince(province != null ? province.getProvinceCode() : null);
             // 转换城市
             City city = cityService.getOne(new LambdaQueryWrapper<City>().eq(City::getCityCode, user.getCityCode()));
-            userDTO.setCity(city != null ? city.getName() : null);
+            userDTO.setCity(city != null ? city.getCityCode() : null);
             if(StringUtils.isNotEmpty(user.getRoleId())){
                 Role role = roleService.getById(user.getRoleId());
                 userDTO.setRoleName(role.getRoleName());

@@ -2,6 +2,7 @@ package com.liwei.rent.common.vo;
 
 import lombok.Data;
 
+import javax.validation.constraints.NotBlank;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -14,9 +15,11 @@ public class UserVO {
      */
     private String userId;
 
+
     /**
      * 用户姓名
      */
+    @NotBlank(message = "姓名不能为空")
     private String userName;
 
     /**
@@ -27,6 +30,7 @@ public class UserVO {
     /**
      * 角色Id
      */
+    @NotBlank(message = "角色不能为空")
     private String roleId;
 
     /**
@@ -47,11 +51,13 @@ public class UserVO {
     /**
      * 电话
      */
+    @NotBlank(message = "电话不能为空")
     private String phone;
 
     /**
      * 登录密码
      */
+    @NotBlank(message = "登录密码不能为空")
     private String password;
 
     /**
