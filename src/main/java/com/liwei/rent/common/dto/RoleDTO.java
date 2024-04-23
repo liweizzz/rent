@@ -1,11 +1,12 @@
 package com.liwei.rent.common.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
 import java.time.LocalDateTime;
 @Data
 public class RoleDTO {
-    private Integer id;
+    private String id;
 
     /**
      * 角色名称
@@ -15,6 +16,7 @@ public class RoleDTO {
     /**
      * 创建时间
      */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createTime;
 
     /**

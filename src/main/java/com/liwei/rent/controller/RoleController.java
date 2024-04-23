@@ -12,10 +12,10 @@ import com.liwei.rent.service.IRoleService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.CollectionUtils;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -50,6 +50,7 @@ public class RoleController {
             res = list.stream().map(role -> {
                 RoleDTO roleDTO = new RoleDTO();
                 BeanUtils.copyProperties(role, roleDTO);
+                roleDTO.setId(String.valueOf(role.getId()));
                 return roleDTO;
             }).collect(Collectors.toList());
         }
@@ -73,7 +74,8 @@ public class RoleController {
 
     @GetMapping(value = "/changeStatus")
     public Result<Void> changeStatus(Integer id,Integer status){
-        roleService.lambdaUpdate().set(Role::getDelFlag,status).eq(Role::getId,id).update();
+        roleService.lambdaUpdate().set(Role::getDelFlag,status)
+                .set(Role::getUpdateTime,LocalDateTime.now()).eq(Role::getId,id).update();
         return Result.ok();
     }
 
