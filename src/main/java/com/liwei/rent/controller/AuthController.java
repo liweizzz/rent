@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.validation.Valid;
 
 @RestController
 @RequestMapping("/auth/user")
@@ -20,7 +21,7 @@ public class AuthController {
     private IUserService userService;
 
     @PostMapping(value = "/login")
-    public Result<UserBaseInfo> login(@RequestBody LoginVO loginVO){
+    public Result<UserBaseInfo> login(@Valid @RequestBody LoginVO loginVO){
         UserBaseInfo res = userService.login(loginVO.getUsername(), loginVO.getPassword());
         return Result.build(res);
     }
