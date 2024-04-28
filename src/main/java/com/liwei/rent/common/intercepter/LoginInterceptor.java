@@ -9,12 +9,16 @@ import com.liwei.rent.common.dto.UserBaseInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 @Slf4j
 @Component
@@ -50,8 +54,11 @@ public class LoginInterceptor implements HandlerInterceptor {
         if(StringUtils.isEmpty(header)){
             return false;
         }
-        String userId = EncryptUtils.decrypt(header, RentConstant.AES_KEY);
+        String userId = EncryptUtils.decrypt(header, RentConstant.KEY);
         UserBaseInfo userBaseInfo = (UserBaseInfo)redisUtils.get(userId);
+        if(userBaseInfo != null){
+            redisUtils.set(userId, userBaseInfo,30);
+        }
         return userBaseInfo != null ? true :false;
     }
 }

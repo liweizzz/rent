@@ -6,6 +6,7 @@ import com.liwei.rent.common.Enum.DelFlagEnum;
 import com.liwei.rent.common.Enum.ErrorCodeEnum;
 import com.liwei.rent.common.exception.RentException;
 import com.liwei.rent.common.utils.DateUtils;
+import com.liwei.rent.common.utils.IdUtils;
 import com.liwei.rent.dao.ReceiptMapper;
 import com.liwei.rent.common.dto.ReceiptDTO;
 import com.liwei.rent.common.vo.PageVO;
@@ -219,6 +220,7 @@ public class ReceiptServiceImpl extends ServiceImpl<ReceiptMapper, Receipt> impl
         List<ReceiptDTO> collect = receiptPageDTO.getRecords().stream().map(receipt -> {
             ReceiptDTO receiptDTO = new ReceiptDTO();
             BeanUtils.copyProperties(receipt,receiptDTO);
+            receiptDTO.setTenantName(IdUtils.maskName(receipt.getTenantName()));
             return receiptDTO;
         }).collect(Collectors.toList());
         BeanUtils.copyProperties(receiptPageDTO,receiptDTOPageDTO);

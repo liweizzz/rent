@@ -3,9 +3,11 @@ package com.liwei.rent.controller;
 
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
+import com.liwei.rent.common.Enum.ErrorCodeEnum;
 import com.liwei.rent.common.dto.Result;
 import com.liwei.rent.common.dto.TenantDTO;
 import com.liwei.rent.common.dto.TenantSimpleDTO;
+import com.liwei.rent.common.exception.RentException;
 import com.liwei.rent.common.utils.IdUtils;
 import com.liwei.rent.entity.Tenant;
 import com.liwei.rent.service.ITenantService;
@@ -48,11 +50,12 @@ public class TenantController {
         logger.info("查询租户列表入参：{}", JSON.toJSONString(tenantVO));
         PageDTO<TenantDTO> res = new PageDTO<>();
         PageDTO<Tenant> tenantPage = tenantService.listTenant(tenantVO, pageVO);
-        //对身份证进行掩码
+        //对身份证、手机号、姓名、地址进行掩码
         tenantPage.getRecords().forEach(tenant -> {
-            if(StringUtils.isNotEmpty(tenant.getIdCard())){
-                tenant.setIdCard(IdUtils.maskIdCard(tenant.getIdCard()));
-            }
+            tenant.setIdCard(IdUtils.maskIdCard(tenant.getIdCard()));
+            tenant.setPhone(IdUtils.maskPhoneNum(tenant.getPhone()));
+            tenant.setTenantName(IdUtils.maskName(tenant.getTenantName()));
+            tenant.setAddress(IdUtils.maskAddress(tenant.getAddress()));
         });
         BeanUtils.copyProperties(tenantPage,res);
         return Result.build(res);
@@ -78,9 +81,15 @@ public class TenantController {
     public Result<TenantDTO> getTenantInfo(Integer id){
         TenantDTO res = new TenantDTO();
         Tenant tenant = tenantService.getById(id);
-        if(tenant != null){
-            BeanUtils.copyProperties(tenant,res);
+        if(tenant == null){
+            throw new RentException(ErrorCodeEnum.TENANT_IS_NOT_EXIST);
         }
+        BeanUtils.copyProperties(tenant,res);
+        //对身份证、手机号、姓名、地址进行掩码
+        res.setIdCard(IdUtils.maskIdCard(tenant.getIdCard()));
+        res.setPhone(IdUtils.maskPhoneNum(tenant.getPhone()));
+        res.setTenantName(IdUtils.maskName(tenant.getTenantName()));
+        res.setAddress(IdUtils.maskAddress(tenant.getAddress()));
         return Result.build(res);
     }
 

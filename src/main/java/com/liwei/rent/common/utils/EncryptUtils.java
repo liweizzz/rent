@@ -6,8 +6,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.crypto.Cipher;
+import javax.crypto.KeyGenerator;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 
 public class EncryptUtils {
     private static final Logger loger = LoggerFactory.getLogger(EncryptUtils.class);
@@ -56,5 +59,25 @@ public class EncryptUtils {
             loger.error("AES解密异常:{}", e.getMessage());
         }
         return null;
+    }
+
+    /**
+     * 生成128位的秘钥
+     * @return
+     */
+    public static String KeyGenerator(){
+        KeyGenerator keyGenerator;
+        try {
+            keyGenerator = KeyGenerator.getInstance("AES");
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
+        SecureRandom secureRandom = new SecureRandom();
+        secureRandom.nextBytes(new byte[16]); // 为keyGenerator设置随机源
+        keyGenerator.init(128, secureRandom); // 256位密钥
+        // 生成AES密钥
+        byte[] keyBytes = keyGenerator.generateKey().getEncoded();
+        // 将密钥编码为Base64字符串
+        return Base64.encodeBase64String(keyBytes);
     }
 }

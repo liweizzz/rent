@@ -65,6 +65,7 @@ public class ApartmentServiceImpl extends ServiceImpl<ApartmentMapper, Apartment
         list.forEach(apartment -> {
             ApartmentDTO apartmentDTO = new ApartmentDTO();
             BeanUtils.copyProperties(apartment,apartmentDTO);
+            apartmentDTO.setAddress(IdUtils.maskAddress(apartment.getAddress()));
             res.add(apartmentDTO);
         });
         return res;

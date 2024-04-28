@@ -1,5 +1,6 @@
 package com.liwei.rent.service.impl;
 
+import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -26,9 +27,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -59,6 +65,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
     private IApartmentService apartmentService;
     @Autowired
     private IRoleService roleService;
+    @Value("${key.file}")
+    private String keyFile;
 
     @Override
     public void saveOrUpdateUser(UserVO userVO) {
@@ -132,6 +140,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
                         Role role = roleService.getById(user.getRoleId());
                         userDTO.setRoleName(role.getRoleName());
                     }
+                    //对身份证、手机号进行掩码
+                    userDTO.setIdCard(IdUtils.maskIdCard(user.getIdCard()));
+                    userDTO.setPhone(IdUtils.maskPhoneNum(user.getPhone()));
+                    userDTO.setAddress(IdUtils.maskAddress(user.getAddress()));
                     return userDTO;
                 }).collect(Collectors.toList());
         BeanUtils.copyProperties(userPageDTO,res,"records");
@@ -158,14 +170,21 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         String token = generateToken(userId);
         UserBaseInfo userBaseInfo = this.wapperUserBaseInfo(user, token);
         //保存到redis
-        redisUtils.set(userId, userBaseInfo, TimeUnit.SECONDS.toMinutes(30));
+        redisUtils.set(userId, userBaseInfo,30);
         //返回token、用户基本信息给前端
         return userBaseInfo;
     }
 
     //生成token
     private String generateToken(String userId){
-        return EncryptUtils.encrypt(userId, RentConstant.AES_KEY);
+        String key;
+        try {
+            key = new String(Files.readAllBytes(Paths.get(keyFile)), StandardCharsets.UTF_8);
+            RentConstant.KEY = key;
+        } catch (IOException e) {
+            throw new RentException(ErrorCodeEnum.KEY_NOT_EXIST);
+        }
+        return EncryptUtils.encrypt(userId, key);
     }
 
     @Override
@@ -173,7 +192,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         if(StringUtils.isEmpty(token)){
             throw new RentException(ErrorCodeEnum.USER_NO_TOKEN);
         }
-        String userId = EncryptUtils.decrypt(token, RentConstant.AES_KEY);
+        String userId = EncryptUtils.decrypt(token, RentConstant.KEY);
         LambdaQueryWrapper<User> cond = new LambdaQueryWrapper<>();
         cond.eq(User::getUserId,userId);
         User user = this.getOne(cond);
@@ -184,7 +203,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
     public void logOut(HttpServletRequest httpRequest){
         String header = httpRequest.getHeader("X-Token");
         if(StringUtils.isEmpty(header)){
-            String userId = EncryptUtils.decrypt(header, RentConstant.AES_KEY);
+            String userId = EncryptUtils.decrypt(header, RentConstant.KEY);
             redisUtils.delete(userId);
         }
     }
@@ -193,18 +212,26 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
     public UserDTO getUser(Integer id) {
         UserDTO userDTO = new UserDTO();
         User user = this.getById(id);
-        if(user != null){
-            BeanUtils.copyProperties(user,userDTO);
-            //转换省份
-            Province province = provinceService.getOne(new LambdaQueryWrapper<Province>().eq(Province::getProvinceCode, user.getProvinceCode()));
-            userDTO.setProvince(province != null ? province.getProvinceCode() : null);
-            // 转换城市
-            City city = cityService.getOne(new LambdaQueryWrapper<City>().eq(City::getCityCode, user.getCityCode()));
-            userDTO.setCity(city != null ? city.getCityCode() : null);
-            if(StringUtils.isNotEmpty(user.getRoleId())){
-                Role role = roleService.getById(user.getRoleId());
-                userDTO.setRoleName(role.getRoleName());
-            }
+        if(user == null){
+            throw new RentException(ErrorCodeEnum.USER_NOT_EXIST);
+        }
+        BeanUtils.copyProperties(user,userDTO);
+        //转换省份
+        Province province = provinceService.getOne(new LambdaQueryWrapper<Province>().eq(Province::getProvinceCode, user.getProvinceCode()));
+        userDTO.setProvince(province != null ? province.getProvinceCode() : null);
+        // 转换城市
+        City city = cityService.getOne(new LambdaQueryWrapper<City>().eq(City::getCityCode, user.getCityCode()));
+        userDTO.setCity(city != null ? city.getCityCode() : null);
+        if(StringUtils.isNotEmpty(user.getRoleId())){
+            Role role = roleService.getById(user.getRoleId());
+            userDTO.setRoleName(role.getRoleName());
+        }
+        //对身份证、手机号进行掩码
+        if(StringUtils.isNotEmpty(user.getIdCard())){
+            userDTO.setIdCard(IdUtils.maskIdCard(user.getIdCard()));
+        }
+        if(StringUtils.isNotEmpty(user.getPhone())){
+            userDTO.setPhone(IdUtils.maskPhoneNum(user.getPhone()));
         }
         return userDTO;
     }
@@ -213,18 +240,19 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         UserBaseInfo userBaseInfo = new UserBaseInfo();
         //获取当前用户登录的角色
         String roleId = user.getRoleId();
-        if(StringUtils.isNotEmpty(roleId)){
-            userBaseInfo.setRoleId(roleId);
-            //获取角色的所有权限
-            List<Privilege> privilegeList = privilegeMapper.getFromRoleIds(roleId);
-            List<PrivilegeDTO> privileges = privilegeList.stream().map(x -> {
-                PrivilegeDTO privilegeDTO = new PrivilegeDTO();
-                BeanUtils.copyProperties(x, privilegeDTO);
-                return privilegeDTO;
-            }).collect(Collectors.toList());
-            //构建权限菜单树
-            userBaseInfo.setPrivileges(this.buildMenuTree(privileges));
+        if(StringUtils.isEmpty(roleId)){
+            throw new RentException(ErrorCodeEnum.USER_ROLE_IS_NULL);
         }
+        userBaseInfo.setRoleId(roleId);
+        //获取角色的所有权限
+        List<Privilege> privilegeList = privilegeMapper.getFromRoleIds(roleId);
+        List<PrivilegeDTO> privileges = privilegeList.stream().map(x -> {
+            PrivilegeDTO privilegeDTO = new PrivilegeDTO();
+            BeanUtils.copyProperties(x, privilegeDTO);
+            return privilegeDTO;
+        }).collect(Collectors.toList());
+        //构建权限菜单树
+        userBaseInfo.setPrivileges(this.buildMenuTree(privileges));
         //获取当前登录用户所有公寓
         List<ApartmentDTO> apartmentDTOS = apartmentService.listApartmentByUserId(user.getUserId());
         userBaseInfo.setApartments(apartmentDTOS);
