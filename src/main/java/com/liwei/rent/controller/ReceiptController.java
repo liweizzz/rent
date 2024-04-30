@@ -4,6 +4,7 @@ package com.liwei.rent.controller;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
 import com.liwei.rent.common.Enum.DelFlagEnum;
 import com.liwei.rent.common.Enum.ErrorCodeEnum;
+import com.liwei.rent.common.annotation.PermissionCheck;
 import com.liwei.rent.common.dto.ReceiptDTO;
 import com.liwei.rent.common.exception.RentException;
 import com.liwei.rent.entity.Receipt;
@@ -43,6 +44,7 @@ public class ReceiptController {
     }
 
     @GetMapping(value = "/getReceipt")
+    @PermissionCheck("receipt:get")
     public Result<ReceiptDTO> getReceipt(Integer id){
         ReceiptDTO res = new ReceiptDTO();
         Receipt receipt = receiptService.getById(id);

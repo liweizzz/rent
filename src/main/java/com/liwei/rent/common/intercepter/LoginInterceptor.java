@@ -9,16 +9,12 @@ import com.liwei.rent.common.dto.UserBaseInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 
 @Slf4j
 @Component
@@ -32,7 +28,7 @@ public class LoginInterceptor implements HandlerInterceptor {
         // 这里可以进行登录验证，比如检查用户的登录状态或权限
         // 如果用户未登录或权限不足，可以重定向到登录页面或返回错误信息
         if (!isUserLoggedIn(request)) {
-            throw new RentException(ErrorCodeEnum.USER_NO_TOKEN);
+            throw new RentException(ErrorCodeEnum.USER_INVALID_TOKEN);
         }
         return true; // 放行该请求，继续处理
     }
@@ -51,7 +47,7 @@ public class LoginInterceptor implements HandlerInterceptor {
     // 返回true表示已登录，返回false表示未登录
     private boolean isUserLoggedIn(HttpServletRequest request) {
         String header = request.getHeader("X-Token");
-        if(StringUtils.isEmpty(header)){
+        if(StringUtils.isEmpty(header) || StringUtils.isEmpty(RentConstant.KEY)){
             return false;
         }
         String userId = EncryptUtils.decrypt(header, RentConstant.KEY);

@@ -1,6 +1,5 @@
 package com.liwei.rent.service.impl;
 
-import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -11,15 +10,13 @@ import com.liwei.rent.common.constant.RentConstant;
 import com.liwei.rent.common.dto.ApartmentDTO;
 import com.liwei.rent.common.dto.PrivilegeDTO;
 import com.liwei.rent.common.exception.RentException;
-import com.liwei.rent.common.utils.EncryptUtils;
-import com.liwei.rent.common.utils.RedisUtils;
+import com.liwei.rent.common.utils.*;
 import com.liwei.rent.dao.PrivilegeMapper;
 import com.liwei.rent.dao.UserMapper;
 import com.liwei.rent.common.dto.UserBaseInfo;
 import com.liwei.rent.common.dto.UserDTO;
 import com.liwei.rent.entity.*;
 import com.liwei.rent.service.*;
-import com.liwei.rent.common.utils.IdUtils;
 import com.liwei.rent.common.vo.UserVO;
 import com.liwei.rent.common.vo.PageVO;
 import org.apache.commons.lang3.StringUtils;
@@ -28,6 +25,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
@@ -35,8 +33,8 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.time.LocalDateTime;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -67,6 +65,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
     private IRoleService roleService;
     @Value("${key.file}")
     private String keyFile;
+    @Autowired
+    private ILoginLogService loginLogService;
 
     @Override
     public void saveOrUpdateUser(UserVO userVO) {
@@ -171,6 +171,17 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         UserBaseInfo userBaseInfo = this.wapperUserBaseInfo(user, token);
         //保存到redis
         redisUtils.set(userId, userBaseInfo,30);
+        HttpServletRequest request = HttpContextUtils.getHttpServletRequest();
+        //记录登录日志表
+        ThreadPoolTaskExecutor threadPoolTaskExecutor = SpringUtils.getBean("asyncTaskExecutor", ThreadPoolTaskExecutor.class);
+        threadPoolTaskExecutor.execute(()->{
+            LoginLog log = new LoginLog();
+            log.setUserId(user.getUserId());
+            log.setIpAddress(IPUtils.getIpAddr(request));
+            log.setCreateTime(LocalDateTime.now());
+            log.setUpdateTime(LocalDateTime.now());
+            loginLogService.save(log);
+        });
         //返回token、用户基本信息给前端
         return userBaseInfo;
     }
@@ -190,7 +201,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
     @Override
     public UserBaseInfo getUserInfo(String token) {
         if(StringUtils.isEmpty(token)){
-            throw new RentException(ErrorCodeEnum.USER_NO_TOKEN);
+            throw new RentException(ErrorCodeEnum.USER_INVALID_TOKEN);
         }
         String userId = EncryptUtils.decrypt(token, RentConstant.KEY);
         LambdaQueryWrapper<User> cond = new LambdaQueryWrapper<>();
@@ -225,13 +236,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         if(StringUtils.isNotEmpty(user.getRoleId())){
             Role role = roleService.getById(user.getRoleId());
             userDTO.setRoleName(role.getRoleName());
-        }
-        //对身份证、手机号进行掩码
-        if(StringUtils.isNotEmpty(user.getIdCard())){
-            userDTO.setIdCard(IdUtils.maskIdCard(user.getIdCard()));
-        }
-        if(StringUtils.isNotEmpty(user.getPhone())){
-            userDTO.setPhone(IdUtils.maskPhoneNum(user.getPhone()));
         }
         return userDTO;
     }

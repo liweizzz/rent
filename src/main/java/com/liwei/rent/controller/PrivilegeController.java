@@ -1,8 +1,10 @@
 package com.liwei.rent.controller;
 
 
+import com.liwei.rent.common.Enum.DelFlagEnum;
 import com.liwei.rent.common.dto.PrivilegeDTO;
 import com.liwei.rent.common.dto.Result;
+import com.liwei.rent.entity.Privilege;
 import com.liwei.rent.service.IPrivilegeService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +34,7 @@ public class PrivilegeController {
 
     @GetMapping(value = "/getAll")
     public Result<List<PrivilegeDTO>> getAllPrivilege(){
-        List<PrivilegeDTO> privilegeDTOList = privilegeService.list().stream().map(privilege -> {
+        List<PrivilegeDTO> privilegeDTOList = privilegeService.lambdaQuery().eq(Privilege::getDelFlag, DelFlagEnum.UN_DEL).list().stream().map(privilege -> {
             PrivilegeDTO privilegeDTO = new PrivilegeDTO();
             BeanUtils.copyProperties(privilege, privilegeDTO);
             return privilegeDTO;

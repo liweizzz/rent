@@ -33,15 +33,15 @@ public class IdUtils {
         String format;
         if(redisUtils.existKey(RentConstant.USER_ID_KEY)){
             Long increment = redisUtils.increment(RentConstant.USER_ID_KEY, 1);
-            format = String.format("%02d", increment);
+            format = String.format("%03d", increment);
         }else {
             try {
                 redisLock.lock(RentConstant.USER_ID_LOCK_KEY);
                 String userId = userMapper.getLatestUserId();
-                //取后2位+1
-                Integer num = StringUtils.isEmpty(userId)? 1 : Integer.valueOf(userId.substring(userId.length()-2,userId.length())) + 1;
+                //取后3位+1
+                Integer num = StringUtils.isEmpty(userId)? 1 : Integer.valueOf(userId.substring(userId.length()-3,userId.length())) + 1;
                 redisUtils.set(RentConstant.USER_ID_KEY,num);
-                format = String.format("%02d", num);
+                format = String.format("%03d", num);
             } finally {
                 redisLock.unlock(RentConstant.USER_ID_LOCK_KEY);
             }
@@ -59,13 +59,13 @@ public class IdUtils {
         String key = RentConstant.TENANT_ID_KEY + userId;
         if(redisUtils.existKey(key)){
             Long increment = redisUtils.increment(key, 1);
-            format = String.format("%02d", increment);
+            format = String.format("%03d", increment);
         }else {
             String tenantId = tenantMapper.getLatestTenantId();
-            //取后2位+1
-            Integer num = StringUtils.isEmpty(tenantId)? 1 : Integer.valueOf(tenantId.substring(tenantId.length()-2,tenantId.length())) + 1;
+            //取后3位+1
+            Integer num = StringUtils.isEmpty(tenantId)? 1 : Integer.valueOf(tenantId.substring(tenantId.length()-3,tenantId.length())) + 1;
             redisUtils.set(key,num);
-            format = String.format("%02d", num);
+            format = String.format("%03d", num);
         }
         return userId + "-T" + format;
     }
@@ -80,13 +80,13 @@ public class IdUtils {
         String key = RentConstant.APARTMENT_ID_KEY + userId;
         if(redisUtils.existKey(key)){
             Long increment = redisUtils.increment(key, 1);
-            format = String.format("%02d", increment);
+            format = String.format("%03d", increment);
         }else {
             String apartmentId = apartmentMapper.getLatestApartmentId();
-            //取后2位+1
-            Integer num = StringUtils.isEmpty(apartmentId)? 1 : Integer.valueOf(apartmentId.substring(apartmentId.length()-2,apartmentId.length())) + 1;
+            //取后3位+1
+            Integer num = StringUtils.isEmpty(apartmentId)? 1 : Integer.valueOf(apartmentId.substring(apartmentId.length()-3,apartmentId.length())) + 1;
             redisUtils.set(key,num);
-            format = String.format("%02d", num);
+            format = String.format("%03d", num);
         }
         return userId+"-A" + format;
     }

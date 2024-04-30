@@ -4,6 +4,7 @@ package com.liwei.rent.controller;
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
 import com.liwei.rent.common.Enum.DelFlagEnum;
+import com.liwei.rent.common.annotation.PermissionCheck;
 import com.liwei.rent.common.dto.UserDTO;
 import com.liwei.rent.common.dto.Result;
 import com.liwei.rent.entity.User;
@@ -48,6 +49,7 @@ public class UserController {
     }
 
     @GetMapping(value = "/get")
+    @PermissionCheck("user:get")
     public Result<UserDTO> getUser(Integer id){
         UserDTO res = userService.getUser(id);
         return Result.build(res);

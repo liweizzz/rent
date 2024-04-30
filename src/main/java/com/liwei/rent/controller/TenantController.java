@@ -4,6 +4,7 @@ package com.liwei.rent.controller;
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
 import com.liwei.rent.common.Enum.ErrorCodeEnum;
+import com.liwei.rent.common.annotation.PermissionCheck;
 import com.liwei.rent.common.dto.Result;
 import com.liwei.rent.common.dto.TenantDTO;
 import com.liwei.rent.common.dto.TenantSimpleDTO;
@@ -13,7 +14,6 @@ import com.liwei.rent.entity.Tenant;
 import com.liwei.rent.service.ITenantService;
 import com.liwei.rent.common.vo.PageVO;
 import com.liwei.rent.common.vo.TenantVO;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
@@ -78,6 +78,7 @@ public class TenantController {
     }
 
     @GetMapping(value = "/getTenantInfo")
+    @PermissionCheck("tenant:get")
     public Result<TenantDTO> getTenantInfo(Integer id){
         TenantDTO res = new TenantDTO();
         Tenant tenant = tenantService.getById(id);
@@ -85,11 +86,6 @@ public class TenantController {
             throw new RentException(ErrorCodeEnum.TENANT_IS_NOT_EXIST);
         }
         BeanUtils.copyProperties(tenant,res);
-        //对身份证、手机号、姓名、地址进行掩码
-        res.setIdCard(IdUtils.maskIdCard(tenant.getIdCard()));
-        res.setPhone(IdUtils.maskPhoneNum(tenant.getPhone()));
-        res.setTenantName(IdUtils.maskName(tenant.getTenantName()));
-        res.setAddress(IdUtils.maskAddress(tenant.getAddress()));
         return Result.build(res);
     }
 

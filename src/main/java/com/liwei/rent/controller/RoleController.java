@@ -1,6 +1,7 @@
 package com.liwei.rent.controller;
 
 
+import com.liwei.rent.common.Enum.DelFlagEnum;
 import com.liwei.rent.common.dto.Result;
 import com.liwei.rent.common.dto.RoleDTO;
 import com.liwei.rent.common.dto.RolePriDTO;
@@ -66,7 +67,8 @@ public class RoleController {
         }
         res.setId(role.getId());
         res.setRoleName(role.getRoleName());
-        List<RolePrivilege> list = rolePrivilegeService.lambdaQuery().eq(RolePrivilege::getRoleId, id).list();
+        List<RolePrivilege> list = rolePrivilegeService.lambdaQuery().eq(RolePrivilege::getRoleId, id)
+                .eq(RolePrivilege::getDelFlag, DelFlagEnum.UN_DEL).list();
         List<Integer> collect = list.stream().map(RolePrivilege::getPrivilegeId).collect(Collectors.toList());
         res.setPrivilegeIdList(collect);
         return Result.build(res);
