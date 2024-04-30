@@ -65,7 +65,7 @@ public class EncryptUtils {
      * 生成128位的秘钥
      * @return
      */
-    public static String KeyGenerator(){
+    public static String keyGenerator(){
         KeyGenerator keyGenerator;
         try {
             keyGenerator = KeyGenerator.getInstance("AES");
