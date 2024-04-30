@@ -20,8 +20,6 @@ public enum ErrorCodeEnum {
 
     RECEIPT_IS_NOT_EXIST(5001,"收据不存在"),
 
-    PRIVILEGE_IS_NOT_EXIST(6001,"权限不存在"),
-
     KEY_NOT_EXIST(7001,"秘钥不存在,登录失败"),
 
     SYSTEM_ERROR(8001,"系统异常")

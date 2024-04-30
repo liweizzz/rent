@@ -65,7 +65,7 @@ public class PermissionInterceptor implements HandlerInterceptor {
         UserBaseInfo userBaseInfo = (UserBaseInfo)redisUtils.get(userId);
         Privilege privilege = privilegeService.lambdaQuery().eq(Privilege::getCode, permissionCode).one();
         if(privilege == null){
-            throw new RentException(ErrorCodeEnum.PRIVILEGE_IS_NOT_EXIST);
+            throw new RentException(ErrorCodeEnum.USER_PERMISSION_DENIED);
         }
         String roleId = userBaseInfo.getRoleId();
         boolean flag = rolePrivilegeService.lambdaQuery().eq(RolePrivilege::getRoleId, roleId)
