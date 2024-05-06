@@ -34,8 +34,6 @@ public class ReceiptController {
     private static final Logger logger = LoggerFactory.getLogger(ReceiptController.class);
     @Autowired
     private IReceiptService receiptService;
-    @Value("${receipt.folderPath}")
-    private String receiptUrl;
 
     @PostMapping(value = "/create")
     public Result<Void> createReceipt(@RequestBody ReceiptVO receiptVO){

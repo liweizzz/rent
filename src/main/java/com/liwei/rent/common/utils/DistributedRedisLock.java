@@ -19,14 +19,15 @@ public class DistributedRedisLock {
      * @param lockName
      * @return
      */
-    public boolean lock(String lockName){
+    public boolean tryLock(String lockName) throws InterruptedException {
         if(redissonClient == null){
             log.info("redis分布式锁redissonClient为空");
             return false;
         }
         RLock lock = redissonClient.getLock(lockName);
         // 锁10秒后自动释放，防止死锁
-        lock.lock(10, TimeUnit.SECONDS);
+//        lock.tryLock(10, TimeUnit.SECONDS);
+        lock.tryLock(0,10,TimeUnit.SECONDS);
         log.info("Thread [{}] DistributedRedisLock lock [{}] success", Thread.currentThread().getName(), lockName);
         return true;
     }
@@ -41,6 +42,10 @@ public class DistributedRedisLock {
             return;
         }
         RLock lock = redissonClient.getLock(lockName);
+        if(lock == null){
+            log.info("释放锁时，锁为空");
+            return;
+        }
         lock.unlock();
         log.info("Thread [{}] DistributedRedisLock unlock [{}] success", Thread.currentThread().getName(), lockName);
     }

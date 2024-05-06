@@ -36,12 +36,14 @@ public class IdUtils {
             format = String.format("%03d", increment);
         }else {
             try {
-                redisLock.lock(RentConstant.USER_ID_LOCK_KEY);
+                redisLock.tryLock(RentConstant.USER_ID_LOCK_KEY);
                 String userId = userMapper.getLatestUserId();
                 //取后3位+1
                 Integer num = StringUtils.isEmpty(userId)? 1 : Integer.valueOf(userId.substring(userId.length()-3,userId.length())) + 1;
                 redisUtils.set(RentConstant.USER_ID_KEY,num);
                 format = String.format("%03d", num);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
             } finally {
                 redisLock.unlock(RentConstant.USER_ID_LOCK_KEY);
             }
