@@ -56,7 +56,7 @@ public class EncryptUtils {
             byte[] encrypted = cipher.doFinal(Base64.decodeBase64(str));
             return new String(encrypted);
         } catch (Exception e) {
-            loger.error("AES解密异常:{}", e.getMessage());
+            loger.error("AES解密异常:{},str:{}，key:{}", e.getMessage(),str,key);
         }
         return null;
     }

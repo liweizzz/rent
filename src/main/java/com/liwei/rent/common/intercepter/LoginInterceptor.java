@@ -51,6 +51,9 @@ public class LoginInterceptor implements HandlerInterceptor {
             return false;
         }
         String userId = EncryptUtils.decrypt(header, RentConstant.KEY);
+        if(StringUtils.isEmpty(userId)){
+            return false;
+        }
         UserBaseInfo userBaseInfo = (UserBaseInfo)redisUtils.get(userId);
         if(userBaseInfo != null){
             redisUtils.set(userId, userBaseInfo,30);
