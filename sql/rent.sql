@@ -4,7 +4,7 @@
  Source Server         : liwei
  Source Server Type    : MySQL
  Source Server Version : 80036
- Source Host           : 47.115.206.75:3306
+ Source Host           : localhost:3306
  Source Schema         : rent
 
  Target Server Type    : MySQL
