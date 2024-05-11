@@ -23,11 +23,13 @@ public class WebConfig implements WebMvcConfigurer {
         registry.addInterceptor(loginInterceptor)
                 .addPathPatterns("/**") // 拦截所有请求
                 .excludePathPatterns("/auth/user/login") // 排除登录页面的请求
+                .excludePathPatterns("/downloadReport")
                 .order(Ordered.LOWEST_PRECEDENCE);
         registry.addInterceptor(logInterceptor);
         registry.addInterceptor(permissionInterceptor)
                 .addPathPatterns("/**") // 拦截所有请求
-                .excludePathPatterns("/auth/user/login"); // 排除登录页面的请求;
+                .excludePathPatterns("/auth/user/login") // 排除登录页面的请求;
+                .excludePathPatterns("/downloadReport");
     }
 
 }

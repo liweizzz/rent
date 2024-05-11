@@ -1,7 +1,8 @@
 package com.liwei.rent.common.dto;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableId;
+import com.alibaba.excel.annotation.ExcelIgnore;
+import com.alibaba.excel.annotation.ExcelProperty;
+import com.alibaba.excel.annotation.format.DateTimeFormat;
 import lombok.Data;
 
 import java.math.BigDecimal;
@@ -9,17 +10,19 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 @Data
 public class ReceiptDTO {
-    @TableId(value = "id", type = IdType.AUTO)
+    @ExcelIgnore
     private Integer id;
 
     /**
      * 所属公寓ID
      */
+    @ExcelIgnore
     private String apartmentId;
 
     /**
      * 租户ID
      */
+    @ExcelIgnore
     private String tenantId;
 
     /**
@@ -30,6 +33,7 @@ public class ReceiptDTO {
     /**
      * 房间号
      */
+    @ExcelProperty(value = "房间号")
     private String roomNum;
 
     /**
@@ -100,16 +104,19 @@ public class ReceiptDTO {
     /**
      * 创建时间
      */
+    @DateTimeFormat(value = "yyyy-MM-dd")
     private LocalDateTime createTime;
 
     /**
      * 修改时间
      */
+    @ExcelIgnore
     private LocalDateTime updateTime;
 
     /**
      * 删除标记
      */
+    @ExcelIgnore
     private Integer delFlag;
 
 }

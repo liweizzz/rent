@@ -1,9 +1,13 @@
 package com.liwei.rent.service.impl;
 
+import com.alibaba.excel.EasyExcel;
+import com.alibaba.excel.ExcelWriter;
+import com.alibaba.excel.write.metadata.WriteSheet;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
 import com.liwei.rent.common.Enum.DelFlagEnum;
 import com.liwei.rent.common.Enum.ErrorCodeEnum;
+import com.liwei.rent.common.exception.EasyExcelCellWriteHandler;
 import com.liwei.rent.common.exception.RentException;
 import com.liwei.rent.common.utils.DateUtils;
 import com.liwei.rent.common.utils.IdUtils;
@@ -20,6 +24,7 @@ import gui.ava.html.Html2Image;
 import jodd.io.FileUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -215,7 +220,7 @@ public class ReceiptServiceImpl extends ServiceImpl<ReceiptMapper, Receipt> impl
         //设置公寓ID
         cond.eq(Receipt::getApartmentId,receiptVO.getApartmentId())
                 .eq(Receipt::getDelFlag,DelFlagEnum.UN_DEL.value())
-                .orderByDesc(Receipt::getCreateTime).orderByAsc(Receipt::getRoomNum);
+                .orderByAsc(Receipt::getRoomNum).orderByDesc(Receipt::getCreateTime);
         PageDTO<Receipt> receiptPageDTO = this.baseMapper.selectPage(page, cond);
         List<ReceiptDTO> collect = receiptPageDTO.getRecords().stream().map(receipt -> {
             ReceiptDTO receiptDTO = new ReceiptDTO();
@@ -265,6 +270,34 @@ public class ReceiptServiceImpl extends ServiceImpl<ReceiptMapper, Receipt> impl
             }
         }
         return imageBytes;
+    }
+
+    @Override
+    public void exportReceipt(String apartmentId,String month) {
+        List<Receipt> receiptList = this.lambdaQuery().eq(Receipt::getApartmentId, apartmentId)
+                .likeRight(Receipt::getCreateTime, month)
+                .eq(Receipt::getDelFlag, DelFlagEnum.UN_DEL.value())
+                .orderByAsc(Receipt::getRoomNum).list();
+
+        List<ReceiptDTO> data = receiptList.stream().map(receipt -> {
+            ReceiptDTO receiptDTO = new ReceiptDTO();
+            BeanUtils.copyProperties(receipt, receiptDTO);
+            return receiptDTO;
+        }).collect(Collectors.toList());
+        // 创建ExcelWriter对象
+        String templateFileName = "C:\\Users\\李威\\Desktop\\模板.xlsx";
+
+        String fileName = "C:\\Users\\李威\\Desktop\\example.xlsx";
+
+        ExcelWriter writer = EasyExcel.write(new File(fileName)).withTemplate(new File(templateFileName)).build();
+        Workbook workbook = writer.writeContext().writeWorkbookHolder().getWorkbook();
+        workbook.setForceFormulaRecalculation(true);
+
+        WriteSheet sheet = EasyExcel.writerSheet().registerWriteHandler(new EasyExcelCellWriteHandler()).build();
+
+        writer.fill(data,sheet).finish();
+
+//        EasyExcel.write(fileName).withTemplate(templateFileName).sheet().doFill(data);
     }
 
 }

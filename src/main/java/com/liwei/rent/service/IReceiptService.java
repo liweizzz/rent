@@ -20,4 +20,6 @@ public interface IReceiptService extends IService<Receipt> {
     PageDTO<ReceiptDTO> listReceipt(ReceiptVO receiptVO, PageVO pageVO);
     //获取收据图片
     byte[] getReceiptImg(Integer id);
+    //导出报表
+    void exportReceipt(String apartmentId,String month);
 }
