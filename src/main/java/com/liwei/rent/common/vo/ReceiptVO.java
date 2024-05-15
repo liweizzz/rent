@@ -28,14 +28,12 @@ public class ReceiptVO {
      * 房租起始日期
      */
     @JsonFormat(pattern="yyyy-MM-dd", timezone = "GMT+8")
-    @NotBlank(message = "房租起始日期不能为空")
     private LocalDate rentStartDay;
 
     /**
      * 房租到期日期
      */
     @JsonFormat(pattern="yyyy-MM-dd", timezone = "GMT+8")
-    @NotBlank(message = "房租到期日期不能为空")
     private LocalDate rentEndDay;
 
     /**
