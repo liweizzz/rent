@@ -3,6 +3,7 @@ package com.liwei.rent.common.vo;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
+import javax.validation.constraints.NotBlank;
 import java.io.Serializable;
 
 /**
@@ -22,6 +23,7 @@ public class TenantVO implements Serializable {
     private String tenantId;
 
     @ApiModelProperty(value = "租户名")
+    @NotBlank(message = "请输入租户姓名")
     private String tenantName;
 
     @ApiModelProperty(value = "房东Id")
@@ -34,9 +36,11 @@ public class TenantVO implements Serializable {
     private String address;
 
     @ApiModelProperty(value = "电话")
+    @NotBlank(message = "请输入电话")
     private String phone;
 
     @ApiModelProperty(value = "身份证号码")
+    @NotBlank(message = "请输入身份证号码")
     private String idCard;
 
     @ApiModelProperty(value = "租户状态 0：在租，1：退租")

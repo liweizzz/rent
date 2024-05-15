@@ -3,6 +3,7 @@ package com.liwei.rent.common.vo;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
+import javax.validation.constraints.NotBlank;
 import java.time.LocalDate;
 
 @Data
@@ -20,23 +21,27 @@ public class ReceiptVO {
     /**
      * 房间号
      */
+    @NotBlank(message = "请选择房间号")
     private String roomNum;
 
     /**
      * 房租起始日期
      */
     @JsonFormat(pattern="yyyy-MM-dd", timezone = "GMT+8")
+    @NotBlank(message = "房租起始日期不能为空")
     private LocalDate rentStartDay;
 
     /**
      * 房租到期日期
      */
     @JsonFormat(pattern="yyyy-MM-dd", timezone = "GMT+8")
+    @NotBlank(message = "房租到期日期不能为空")
     private LocalDate rentEndDay;
 
     /**
      * 房租金额
      */
+    @NotBlank(message = "房租金额不能为空")
     private String rentMoney;
 
     /**

@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 
 /**
@@ -28,7 +29,7 @@ public class ApartmentController {
     private IApartmentService apartmentService;
 
     @PostMapping(value = "/saveOrUpdate")
-    public Result<Void> saveOrUpdateApartment(@RequestBody ApartmentVO apartmentVO){
+    public Result<Void> saveOrUpdateApartment(@Valid @RequestBody ApartmentVO apartmentVO){
         apartmentService.saveOrUpdateApartment(apartmentVO);
         return Result.ok();
     }

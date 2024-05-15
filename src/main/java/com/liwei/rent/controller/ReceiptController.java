@@ -20,6 +20,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
+
 /**
  * <p>
  * 收据表 前端控制器
@@ -36,7 +38,7 @@ public class ReceiptController {
     private IReceiptService receiptService;
 
     @PostMapping(value = "/create")
-    public Result<Void> createReceipt(@RequestBody ReceiptVO receiptVO){
+    public Result<Void> createReceipt(@Valid @RequestBody ReceiptVO receiptVO){
         receiptService.createReceipt(receiptVO);
         return Result.ok();
     }

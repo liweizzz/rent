@@ -20,6 +20,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 
 /**
@@ -39,7 +40,7 @@ public class TenantController {
     private ITenantService tenantService;
 
     @PostMapping(value = "/saveOrUpdate")
-    public Result<Void> addTenant(@RequestBody TenantVO tenantVO){
+    public Result<Void> addTenant(@Valid @RequestBody TenantVO tenantVO){
         logger.info("新增/修改租户入参：{}", JSON.toJSONString(tenantVO));
         tenantService.saveOrUpdateTenant(tenantVO);
         return Result.ok();
