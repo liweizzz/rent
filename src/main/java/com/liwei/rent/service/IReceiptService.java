@@ -7,6 +7,8 @@ import com.liwei.rent.common.vo.ReceiptVO;
 import com.liwei.rent.entity.Receipt;
 import com.baomidou.mybatisplus.extension.service.IService;
 
+import javax.servlet.http.HttpServletResponse;
+
 /**
  * <p>
  * 收据表 服务类
@@ -21,5 +23,5 @@ public interface IReceiptService extends IService<Receipt> {
     //获取收据图片
     byte[] getReceiptImg(Integer id);
     //导出报表
-    void exportReceipt(String apartmentId,String month);
+    void exportReceipt(String apartmentId, String month, HttpServletResponse response);
 }

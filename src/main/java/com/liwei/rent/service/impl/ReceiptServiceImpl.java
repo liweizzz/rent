@@ -3,6 +3,7 @@ package com.liwei.rent.service.impl;
 import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.ExcelWriter;
 import com.alibaba.excel.write.metadata.WriteSheet;
+import com.alibaba.excel.write.metadata.fill.FillConfig;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
 import com.liwei.rent.common.Enum.DelFlagEnum;
@@ -28,14 +29,17 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import javax.imageio.ImageIO;
+import javax.servlet.http.HttpServletResponse;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -54,6 +58,10 @@ import java.util.stream.Collectors;
 public class ReceiptServiceImpl extends ServiceImpl<ReceiptMapper, Receipt> implements IReceiptService {
     @Value("${receipt.folderPath}")
     private String receiptPath;
+    @Value("${report.templet}")
+    private String templetPath;
+    @Value("${report.path}")
+    private String reportPath;
 
     @Override
     public void createReceipt(ReceiptVO receiptVO) {
@@ -225,6 +233,7 @@ public class ReceiptServiceImpl extends ServiceImpl<ReceiptMapper, Receipt> impl
         List<ReceiptDTO> collect = receiptPageDTO.getRecords().stream().map(receipt -> {
             ReceiptDTO receiptDTO = new ReceiptDTO();
             BeanUtils.copyProperties(receipt,receiptDTO);
+            receiptDTO.setRoomNum(Integer.valueOf(receipt.getRoomNum()));
             receiptDTO.setTenantName(IdUtils.maskName(receipt.getTenantName()));
             return receiptDTO;
         }).collect(Collectors.toList());
@@ -273,7 +282,7 @@ public class ReceiptServiceImpl extends ServiceImpl<ReceiptMapper, Receipt> impl
     }
 
     @Override
-    public void exportReceipt(String apartmentId,String month) {
+    public void exportReceipt(String apartmentId,String month,HttpServletResponse response) {
         List<Receipt> receiptList = this.lambdaQuery().eq(Receipt::getApartmentId, apartmentId)
                 .likeRight(Receipt::getCreateTime, month)
                 .eq(Receipt::getDelFlag, DelFlagEnum.UN_DEL.value())
@@ -282,22 +291,68 @@ public class ReceiptServiceImpl extends ServiceImpl<ReceiptMapper, Receipt> impl
         List<ReceiptDTO> data = receiptList.stream().map(receipt -> {
             ReceiptDTO receiptDTO = new ReceiptDTO();
             BeanUtils.copyProperties(receipt, receiptDTO);
+            receiptDTO.setRoomNum(Integer.valueOf(receipt.getRoomNum()));
+            receiptDTO.setDeposit(receipt.getDeposit() == null ? BigDecimal.ZERO : receipt.getDeposit());
             return receiptDTO;
         }).collect(Collectors.toList());
         // 创建ExcelWriter对象
-        String templateFileName = "C:\\Users\\李威\\Desktop\\模板.xlsx";
+        if(CollectionUtils.isEmpty(data)){
+            log.info("当月数据为空，月份：{}",month);
+           return;
+        }
 
-        String fileName = "C:\\Users\\李威\\Desktop\\example.xlsx";
-
-        ExcelWriter writer = EasyExcel.write(new File(fileName)).withTemplate(new File(templateFileName)).build();
+        File report = new File(reportPath);
+        if(!report.exists()){
+            try {
+                report.createNewFile();
+            } catch (IOException e) {
+                log.error("报表创建失败");
+                throw new RentException(ErrorCodeEnum.CREATE_REPORT_ERROR);
+            }
+        }
+        ExcelWriter writer = EasyExcel.write(report).withTemplate(new File(templetPath)).build();
         Workbook workbook = writer.writeContext().writeWorkbookHolder().getWorkbook();
         workbook.setForceFormulaRecalculation(true);
-
         WriteSheet sheet = EasyExcel.writerSheet().registerWriteHandler(new EasyExcelCellWriteHandler()).build();
+//        Map<String,Object> value = new HashMap<>();
+//        value.put("otherMoney",500);
+//        value.put("otherInfo","jgjkgjhg");
+//        FillConfig fillConfig = FillConfig.builder().forceNewRow(Boolean.TRUE).build();
 
         writer.fill(data,sheet).finish();
-
+        this.download(response,report);
 //        EasyExcel.write(fileName).withTemplate(templateFileName).sheet().doFill(data);
+    }
+
+    private void download(HttpServletResponse response,File file){
+        if(!file.exists()){
+            log.info("未找到报表文件");
+        }
+        // 设置响应头，指定文件为附件并提供文件名
+        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        response.setHeader("Access-Control-Expose-Headers","Content-Disposition");
+        response.setHeader("Content-Disposition", "attachment; filename=" + file.getName());
+
+        // 读取文件内容并写入响应体
+        FileInputStream fileInputStream = null;
+        try {
+            fileInputStream = new FileInputStream(file);
+            int bytesRead;
+            byte[] buffer = new byte[4096];
+            while ((bytesRead = fileInputStream.read(buffer)) != -1) {
+                response.getOutputStream().write(buffer, 0, bytesRead);
+            }
+        } catch (Exception e) {
+            log.error("下载报表文件异常,{}",e);
+        } finally {
+            if(fileInputStream != null){
+                try {
+                    fileInputStream.close();
+                } catch (IOException e) {
+                    log.error("文件流关闭异常,{}",e);
+                }
+            }
+        }
     }
 
 }

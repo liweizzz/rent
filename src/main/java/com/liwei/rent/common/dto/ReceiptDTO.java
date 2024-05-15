@@ -3,6 +3,7 @@ package com.liwei.rent.common.dto;
 import com.alibaba.excel.annotation.ExcelIgnore;
 import com.alibaba.excel.annotation.ExcelProperty;
 import com.alibaba.excel.annotation.format.DateTimeFormat;
+import com.alibaba.excel.annotation.format.NumberFormat;
 import lombok.Data;
 
 import java.math.BigDecimal;
@@ -34,7 +35,7 @@ public class ReceiptDTO {
      * 房间号
      */
     @ExcelProperty(value = "房间号")
-    private String roomNum;
+    private Integer roomNum;
 
     /**
      * 房租起始日期
@@ -95,6 +96,11 @@ public class ReceiptDTO {
      * 收款人签名
      */
     private String signature;
+
+    /**
+     * 押金
+     */
+    private BigDecimal deposit;
 
     /**
      * 金额合计

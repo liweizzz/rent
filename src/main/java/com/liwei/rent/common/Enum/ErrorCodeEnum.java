@@ -15,10 +15,15 @@ public enum ErrorCodeEnum {
 
     TENANT_ROOM_BIND(3001,"房间已绑定租户"),
     TENANT_IS_NOT_EXIST(3002,"租户不存在"),
+    APPARTENT_IS_NULL(3003,"公寓不能为空"),
+    MONTH_IS_NULL(3004,"月份不能为空"),
 
     RECEIPT_CUR_ELECNUM_IS_ERROR(4001,"期末电表度数错误！"),
 
     RECEIPT_IS_NOT_EXIST(5001,"收据不存在"),
+
+    CREATE_REPORT_ERROR(6001,"创建报表失败"),
+    MONTH_IS_ILLEGAL(6002,"日期选择不正确"),
 
     KEY_NOT_EXIST(7001,"秘钥不存在,登录失败"),
 
