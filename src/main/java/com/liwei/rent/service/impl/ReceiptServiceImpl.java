@@ -177,7 +177,9 @@ public class ReceiptServiceImpl extends ServiceImpl<ReceiptMapper, Receipt> impl
             throw new RuntimeException(e);
         } finally {
             try {
-                fileWriter.close();
+                if(fileWriter != null){
+                    fileWriter.close();
+                }
                 //删除生成的html文件
                 htmlFile.delete();
             } catch (IOException e) {
@@ -228,7 +230,7 @@ public class ReceiptServiceImpl extends ServiceImpl<ReceiptMapper, Receipt> impl
         //设置公寓ID
         cond.eq(Receipt::getApartmentId,receiptVO.getApartmentId())
                 .eq(Receipt::getDelFlag,DelFlagEnum.UN_DEL.value())
-                .orderByAsc(Receipt::getRoomNum).orderByDesc(Receipt::getCreateTime);
+                .orderByDesc(Receipt::getCreateTime).orderByAsc(Receipt::getRoomNum);
         PageDTO<Receipt> receiptPageDTO = this.baseMapper.selectPage(page, cond);
         List<ReceiptDTO> collect = receiptPageDTO.getRecords().stream().map(receipt -> {
             ReceiptDTO receiptDTO = new ReceiptDTO();

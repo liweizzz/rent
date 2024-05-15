@@ -1,5 +1,7 @@
 package com.liwei.rent.common.utils;
 
+import com.liwei.rent.common.Enum.ErrorCodeEnum;
+import com.liwei.rent.common.exception.RentException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.tomcat.util.codec.binary.Base64;
 import org.slf4j.Logger;
@@ -57,8 +59,8 @@ public class EncryptUtils {
             return new String(encrypted);
         } catch (Exception e) {
             loger.error("AES解密异常:{},str:{}，key:{}", e.getMessage(),str,key);
+            throw new RentException(ErrorCodeEnum.SYSTEM_ERROR);
         }
-        return null;
     }
 
     /**
