@@ -114,7 +114,7 @@ public class ReceiptServiceImpl extends ServiceImpl<ReceiptMapper, Receipt> impl
         Writer fileWriter = null;
         File htmlFile = null;
         try {
-            cfg.setDirectoryForTemplateLoading(new File("src/main/resources/templates"));
+            cfg.setClassLoaderForTemplateLoading(ReceiptServiceImpl.class.getClassLoader(), "templates");
             // 加载模板文件
             Template template = cfg.getTemplate("receipt.html");
             // 创建数据模型
@@ -159,7 +159,7 @@ public class ReceiptServiceImpl extends ServiceImpl<ReceiptMapper, Receipt> impl
             //金额合计（包含押金）= 租金+电费+水费+网费+押金
             data.put("sumMoneyWithDeposit",sumMoneyWithDeposit.toPlainString());
             // 渲染模板
-            htmlFile = new File("src/main/resources/static/"+receiptVO.getRoomNum()+".html");
+            htmlFile = new File(receiptPath+receiptVO.getRoomNum()+".html");
             if(!htmlFile.exists()){
                 htmlFile.createNewFile();
             }
@@ -184,7 +184,9 @@ public class ReceiptServiceImpl extends ServiceImpl<ReceiptMapper, Receipt> impl
                     fileWriter.close();
                 }
                 //删除生成的html文件
-                htmlFile.delete();
+                if(htmlFile != null){
+                    htmlFile.delete();
+                }
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
