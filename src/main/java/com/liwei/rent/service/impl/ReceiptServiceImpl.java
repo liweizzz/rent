@@ -115,6 +115,7 @@ public class ReceiptServiceImpl extends ServiceImpl<ReceiptMapper, Receipt> impl
         File htmlFile = null;
         try {
             cfg.setClassLoaderForTemplateLoading(ReceiptServiceImpl.class.getClassLoader(), "templates");
+            cfg.setDefaultEncoding("UTF-8");
             // 加载模板文件
             Template template = cfg.getTemplate("receipt.html");
             // 创建数据模型
