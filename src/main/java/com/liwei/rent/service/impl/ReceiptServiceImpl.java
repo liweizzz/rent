@@ -160,6 +160,9 @@ public class ReceiptServiceImpl extends ServiceImpl<ReceiptMapper, Receipt> impl
             data.put("sumMoneyWithDeposit",sumMoneyWithDeposit.toPlainString());
             // 渲染模板
             htmlFile = new File("src/main/resources/static/"+receiptVO.getRoomNum()+".html");
+            if(!htmlFile.exists()){
+                htmlFile.createNewFile();
+            }
             fileWriter  = new FileWriter(htmlFile);
             template.process(data, fileWriter);
             // 将 HTML文件转换为图片
