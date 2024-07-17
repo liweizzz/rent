@@ -7,6 +7,9 @@ import com.liwei.rent.common.Enum.ErrorCodeEnum;
 import com.liwei.rent.common.annotation.PermissionCheck;
 import com.liwei.rent.common.dto.ReceiptDTO;
 import com.liwei.rent.common.exception.RentException;
+import com.liwei.rent.common.utils.DateUtils;
+import com.liwei.rent.common.utils.SpringUtils;
+import com.liwei.rent.common.vo.ReceiptBatchVO;
 import com.liwei.rent.entity.Receipt;
 import com.liwei.rent.common.vo.PageVO;
 import com.liwei.rent.common.vo.ReceiptVO;
@@ -17,10 +20,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.List;
+import java.util.concurrent.CountDownLatch;
 
 /**
  * <p>
@@ -43,8 +48,14 @@ public class ReceiptController {
         return Result.ok();
     }
 
+    @PostMapping(value = "/createBatch")
+    public Result<Void> createReceiptBatch(@RequestBody List<ReceiptBatchVO> batchList){
+        receiptService.createReceiptBatch(batchList);
+        return Result.ok();
+    }
+
     @GetMapping(value = "/getReceipt")
-    @PermissionCheck("receipt:get")
+//    @PermissionCheck("receipt:get")
     public Result<ReceiptDTO> getReceipt(Integer id){
         ReceiptDTO res = new ReceiptDTO();
         Receipt receipt = receiptService.getById(id);
@@ -52,6 +63,7 @@ public class ReceiptController {
             throw new RentException(ErrorCodeEnum.RECEIPT_IS_NOT_EXIST);
         }
         BeanUtils.copyProperties(receipt,res);
+        res.setRoomNum(Integer.valueOf(receipt.getRoomNum()));
         return Result.build(res);
     }
 

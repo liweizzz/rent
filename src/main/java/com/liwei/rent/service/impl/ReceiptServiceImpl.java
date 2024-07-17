@@ -11,6 +11,8 @@ import com.liwei.rent.common.exception.EasyExcelCellWriteHandler;
 import com.liwei.rent.common.exception.RentException;
 import com.liwei.rent.common.utils.DateUtils;
 import com.liwei.rent.common.utils.IdUtils;
+import com.liwei.rent.common.utils.SpringUtils;
+import com.liwei.rent.common.vo.ReceiptBatchVO;
 import com.liwei.rent.dao.ReceiptMapper;
 import com.liwei.rent.common.dto.ReceiptDTO;
 import com.liwei.rent.common.vo.PageVO;
@@ -27,6 +29,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -41,6 +44,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
 import java.util.stream.Collectors;
 
 /**
@@ -91,6 +95,45 @@ public class ReceiptServiceImpl extends ServiceImpl<ReceiptMapper, Receipt> impl
         fillReceipt(receiptVO,waterMoneyCount,elecMoney,sumMoney,sumMoneyWithDeposit);
         //保存数据库
         this.saveToDB(receiptVO,rentMoney,elecPrice,elecMoney,waterMoney,internetMoney,sumMoney);
+    }
+
+    @Override
+    public void createReceiptBatch(List<ReceiptBatchVO> batchList) {
+        for (ReceiptBatchVO vo : batchList) {
+            if(vo.getCurElecNum() == null){
+                throw new RentException(ErrorCodeEnum.RECEIPT_CUR_ELECNUM_IS_ERROR);
+            }
+        }
+        ThreadPoolTaskExecutor threadPoolTaskExecutor = SpringUtils.getBean("asyncTaskExecutor", ThreadPoolTaskExecutor.class);
+        CountDownLatch count = new CountDownLatch(batchList.size());
+        for (ReceiptBatchVO vo : batchList) {
+            threadPoolTaskExecutor.execute(() -> {
+                String roomNum = vo.getRoomNum();
+                Integer curElecNum = vo.getCurElecNum();
+                Receipt receipt = this.lambdaQuery().eq(Receipt::getRoomNum,roomNum)
+                        .eq(Receipt::getDelFlag,DelFlagEnum.UN_DEL)
+                        .orderByDesc(Receipt::getCreateTime).last("limit 1").one();
+                ReceiptVO receiptVO = new ReceiptVO();
+                BeanUtils.copyProperties(receipt,receiptVO,"id");
+                receiptVO.setRentMoney(receipt.getRentMoney().toPlainString());
+                receiptVO.setElecPrice(receipt.getElecPrice().toPlainString());
+                receiptVO.setInternetMoney(receipt.getInternetMoney().toPlainString());
+                receiptVO.setWaterMoney(receipt.getWaterMoney().toPlainString());
+                //房租起始日期
+                receiptVO.setRentStartDay(DateUtils.getStartDay(receiptVO.getRentEndDay()));
+                //房租结束日期
+                receiptVO.setRentEndDay(DateUtils.getEndDay(receiptVO.getRentStartDay()));
+                receiptVO.setCurElecNum(curElecNum);
+                receiptVO.setLastElecNum(receipt.getCurElecNum());
+                this.createReceipt(receiptVO);
+                count.countDown();
+            });
+        }
+        try {
+            count.await();
+        } catch (InterruptedException e) {
+            throw new RentException(ErrorCodeEnum.RECEIPT_THREAD_EXCEPTION);
+        }
     }
 
     private void vaildParam(ReceiptVO receiptVO){

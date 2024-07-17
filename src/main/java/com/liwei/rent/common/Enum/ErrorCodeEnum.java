@@ -21,6 +21,7 @@ public enum ErrorCodeEnum {
     RECEIPT_CUR_ELECNUM_IS_ERROR(4001,"期末电表度数错误！"),
 
     RECEIPT_IS_NOT_EXIST(5001,"收据不存在"),
+    RECEIPT_THREAD_EXCEPTION(5002,"线程执行异常"),
 
     CREATE_REPORT_ERROR(6001,"创建报表失败"),
     MONTH_IS_ILLEGAL(6002,"日期选择不正确"),

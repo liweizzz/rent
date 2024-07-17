@@ -15,9 +15,9 @@ public class ThreadPoolConfig {
 
     private static final int MAX_POOL_SIZE = 4;
 
-    private static final int QUEUE_CAPACITY = 10;
+    private static final int QUEUE_CAPACITY = 20;
 
-    private static final String THREAD_NAME_PREFIX = "SAVE-LOGIN-LOG-TASK-";
+    private static final String THREAD_NAME_PREFIX = "RENT";
 
     /**
      * 异步任务
@@ -45,7 +45,7 @@ public class ThreadPoolConfig {
         threadPoolTaskExecutor.setAllowCoreThreadTimeOut(false);
         threadPoolTaskExecutor.initialize();
 
-        log.info("异步保存登录日志线程池配置成功,核心线程数:{},线程名称前缀:{}", threadPoolTaskExecutor.getCorePoolSize(), threadPoolTaskExecutor.getThreadNamePrefix());
+        log.info("线程池配置成功,核心线程数:{},线程名称前缀:{}", threadPoolTaskExecutor.getCorePoolSize(), threadPoolTaskExecutor.getThreadNamePrefix());
         return threadPoolTaskExecutor;
     }
 

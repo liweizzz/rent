@@ -1,6 +1,8 @@
 package arithmetic;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -25,13 +27,27 @@ public class LeetCode3 {
         }
         return ans;
     }
+
+    public static int solution1(String s){
+        int left = 0;
+        int max = 0;
+        Map<Character,Integer> map = new HashMap<>();
+        for (int i = 0; i < s.length(); i++) {
+            if(map.containsKey(s.charAt(i))){
+                left = Math.max(left,map.get(s.charAt(i))+1);
+            }
+            map.put(s.charAt(i),i);
+            max = Math.max(max,i-left+1);
+        }
+        return max;
+    }
     
     public static void test(){
         System.out.println(Double.valueOf(0));
     }
 
     public static void main(String[] args) {
-//        solution("pwwkew");
-        test();
+        solution1("abba");
+//        test();
     }
 }
