@@ -25,6 +25,7 @@ public enum ErrorCodeEnum {
 
     CREATE_REPORT_ERROR(6001,"创建报表失败"),
     MONTH_IS_ILLEGAL(6002,"日期选择不正确"),
+    RECEPT_DATE_IS_NULL(6003,"当月数据为空"),
 
     KEY_NOT_EXIST(7001,"秘钥不存在,登录失败"),
 

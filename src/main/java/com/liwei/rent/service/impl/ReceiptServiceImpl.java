@@ -346,8 +346,7 @@ public class ReceiptServiceImpl extends ServiceImpl<ReceiptMapper, Receipt> impl
         }).collect(Collectors.toList());
         // 创建ExcelWriter对象
         if(CollectionUtils.isEmpty(data)){
-            log.info("当月数据为空，月份：{}",month);
-           return;
+            throw new RentException(ErrorCodeEnum.RECEPT_DATE_IS_NULL);
         }
 
         File report = new File(reportPath);

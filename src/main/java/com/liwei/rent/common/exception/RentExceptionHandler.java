@@ -13,7 +13,7 @@ public class RentExceptionHandler {
 
     @ResponseBody
     @ExceptionHandler(RentException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public Result handleRentException(RentException e){
         return Result.error(e.getCode(),e.getMessage());
     }
