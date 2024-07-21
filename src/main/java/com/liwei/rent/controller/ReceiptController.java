@@ -7,8 +7,6 @@ import com.liwei.rent.common.Enum.ErrorCodeEnum;
 import com.liwei.rent.common.annotation.PermissionCheck;
 import com.liwei.rent.common.dto.ReceiptDTO;
 import com.liwei.rent.common.exception.RentException;
-import com.liwei.rent.common.utils.DateUtils;
-import com.liwei.rent.common.utils.SpringUtils;
 import com.liwei.rent.common.vo.ReceiptBatchVO;
 import com.liwei.rent.entity.Receipt;
 import com.liwei.rent.common.vo.PageVO;
@@ -20,12 +18,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.List;
-import java.util.concurrent.CountDownLatch;
 
 /**
  * <p>
