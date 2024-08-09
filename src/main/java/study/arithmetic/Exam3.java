@@ -13,43 +13,71 @@ import java.util.List;
  * 5：A={5,9}，n=5555，返回999
  */
 public class Exam3 {
-    public static int solution(List<Integer> arrs,int n){
-        List<Integer> list = new ArrayList<>();
-        while (n>0){
-            list.add(n%10);
-            n /= 10;
-        }
-        StringBuilder sb = new StringBuilder();
-        for (Integer target : list) {
+    public static int findMaxLessThanN(int[] A, int n) {
+        char[] nChars = String.valueOf(n).toCharArray();
+        Arrays.sort(A);
+        String result = generateMax(A, nChars, true);
+        return Integer.parseInt(result);
+    }
 
+    private static String generateMax(int[] A, char[] nChars, boolean isLimit) {
+        StringBuilder sb = new StringBuilder();
+
+        for (int i = 0; i < nChars.length; i++) {
+            boolean found = false;
+            for (int j = A.length - 1; j >= 0; j++) {
+                if (isLimit && A[j] + '0' > nChars[i]) {
+                    continue;
+                }
+
+                if (A[j] + '0' < nChars[i]) {
+                    sb.append(A[j]);
+                    found = true;
+                    break;
+                }
+
+                if (A[j] + '0' == nChars[i]) {
+                    sb.append(A[j]);
+                    if (i == nChars.length - 1) {
+                        found = true;
+                    } else {
+                        String remaining = generateMax(A, Arrays.copyOfRange(nChars, i + 1, nChars.length), isLimit);
+                        if (remaining.length() == nChars.length - i - 1) {
+                            sb.append(remaining);
+                            found = true;
+                        }
+                    }
+                    break;
+                }
+            }
+
+            if (found) {
+                break;
+            } else if (i > 0) {
+                sb.deleteCharAt(sb.length() - 1);
+                for (int j = A.length - 1; j >= 0; j--) {
+                    if (A[j] + '0' < nChars[i - 1]) {
+                        sb.append(A[j]);
+                        break;
+                    }
+                }
+                for (int k = i; k < nChars.length; k++) {
+                    sb.append(A[A.length - 1]);
+                }
+                break;
+            }
         }
-//            //最高位
-//            Integer element = stack.pop();
-//            if(arrs.contains(element)){
-//                sb.append(element);
-//            }else {
-//                int max = 0;
-//                for (int i = 0; i < arrs.size(); i++) {
-//                    if(arrs.get(i) < element){
-//                        max = Math.max(arrs.get(i),max);
-//                    }
-//                }
-//                sb.append(max);
-//                while (!stack.empty()){
-//                    for (int i = 0; i < arrs.size(); i++) {
-//                        if(arrs.get(i) < element){
-//                            max = Math.max(arrs.get(i),max);
-//                        }
-//                    }
-//                }
-//
-//            }
-        return Integer.valueOf(sb.toString());
+
+        while (sb.length() < nChars.length) {
+            sb.append(A[A.length - 1]);
+        }
+
+        return sb.toString();
     }
 
     public static void main(String[] args) {
-        Integer[] arrs = {1,2,9,4};
+        int[] arrs = {1,2,9,4};
         int n = 2533;
-        System.out.println(solution(Arrays.asList(arrs),n));
+        System.out.println(findMaxLessThanN(arrs,n));
     }
 }
