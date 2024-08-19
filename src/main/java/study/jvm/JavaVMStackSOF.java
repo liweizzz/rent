@@ -1,4 +1,4 @@
-package study;
+package study.jvm;
 
 public class JavaVMStackSOF {
     private int stackLength = 1;

@@ -1,5 +1,8 @@
 package study.arithmetic;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Scanner;
 
 public class LastWord {
@@ -55,13 +58,34 @@ public class LastWord {
 //            System.out.println(getWord(str));
 //        }
 //    }
-    public static void main(String[] args) {
-        Scanner in = new Scanner(System.in);
-        // 注意 hasNext 和 hasNextLine 的区别
-        while (in.hasNextInt()) { // 注意 while 处理多个 case
-            int a = in.nextInt();
-            int b = in.nextInt();
-            System.out.println(aaa(a,b));
+
+    public static void delete(List<String> list){
+//        Iterator<String> iterator = list.iterator();
+//        while(iterator.hasNext()){
+//            iterator.next();
+//            iterator.remove();
+//        }
+//        for (int i = 2; i >= 0; i--) {
+//            list.remove(list.get(i));
+//        }
+        for (int i = 0; i <3; i++) {
+            list.remove(list.get(i));
         }
+        System.out.println(list);
+    }
+
+    public static void main(String[] args) {
+//        Scanner in = new Scanner(System.in);
+//        // 注意 hasNext 和 hasNextLine 的区别
+//        while (in.hasNextInt()) { // 注意 while 处理多个 case
+//            int a = in.nextInt();
+//            int b = in.nextInt();
+//            System.out.println(aaa(a,b));
+//        }
+        List<String> list = new ArrayList<>();
+        list.add("a");
+        list.add("b");
+        list.add("c");
+        delete(list);
     }
 }

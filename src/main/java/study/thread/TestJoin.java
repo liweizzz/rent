@@ -1,4 +1,4 @@
-package study;
+package study.thread;
 
 public class TestJoin {
     public static void main(String[] args) throws InterruptedException {

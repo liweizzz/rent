@@ -1,4 +1,4 @@
-package study;
+package study.jvm;
 
 public class StackOverflowExample {
     public static void main(String[] args) {

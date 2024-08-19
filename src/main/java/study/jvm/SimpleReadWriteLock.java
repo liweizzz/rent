@@ -1,4 +1,4 @@
-package study;
+package study.jvm;
 
 public class SimpleReadWriteLock {
     private volatile boolean writeLocked = false;

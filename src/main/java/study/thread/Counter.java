@@ -1,4 +1,4 @@
-package study.arithmetic;
+package study.thread;
 
 /**
  * 设计两个线程，依次交替执行a+1，直到a=100为止，并且输出当前的线程名和a的值

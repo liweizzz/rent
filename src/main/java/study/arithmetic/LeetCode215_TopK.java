@@ -11,9 +11,11 @@ import java.util.PriorityQueue;
 public class LeetCode215_TopK {
     public static int solution(int[] arrs,int k){
         PriorityQueue<Integer> queue = new PriorityQueue();
+        //先把前k个元素放到队列中
         for (int i = 0; i < k; i++) {
             queue.offer(arrs[i]);
         }
+        //依次对后面的元素与堆顶元素进行比较，如果比堆顶元素大，
         for (int i = k; i < arrs.length; i++) {
             if(arrs[i] > queue.peek()){
                 queue.poll();
