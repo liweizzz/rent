@@ -17,6 +17,7 @@
         <result column="elec_price" property="elecPrice" />
         <result column="elec_money" property="elecMoney" />
         <result column="people_count" property="peopleCount" />
+        <result column="all_people_count" property="allPeopleCount" />
         <result column="water_money" property="waterMoney" />
         <result column="internet_money" property="internetMoney" />
         <result column="note" property="note" />

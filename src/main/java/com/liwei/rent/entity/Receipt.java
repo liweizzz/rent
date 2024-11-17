@@ -94,6 +94,11 @@ public class Receipt implements Serializable {
     private Integer peopleCount;
 
     /**
+     * 居住总人数
+     */
+    private Integer allPeopleCount;
+
+    /**
      * 水费
      */
     private BigDecimal waterMoney;

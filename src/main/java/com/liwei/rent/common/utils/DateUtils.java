@@ -8,8 +8,8 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
-import java.time.temporal.TemporalAdjuster;
 import java.time.temporal.TemporalAdjusters;
 import java.util.Date;
 
@@ -90,6 +90,33 @@ public class DateUtils {
         }
         //当月日期+一个月
         return localDate.plusMonths(1).minusDays(1);
+    }
+
+    /**
+     * 指定年月，计算上月
+     * @param date
+     * @return
+     */
+    public static String calMonth(String date){
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM");
+        YearMonth yearMonth = YearMonth.parse(date, formatter);
+        YearMonth previousMonth = yearMonth.minusMonths(1);
+        return previousMonth.format(formatter);
+    }
+
+    /**
+     * 获取报表sheet名称
+     * @return
+     */
+    public static String getReportFieldName(String pattern){
+        // 获取当前日期
+        LocalDate currentDate = LocalDate.now();
+        // 格式化日期
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(pattern);
+        // 获取当前月的第一天和最后一天
+        LocalDate firstDayOfMonth = LocalDate.of(currentDate.getYear(), currentDate.getMonthValue(), 1);
+        LocalDate lastDayOfMonth = firstDayOfMonth.plusMonths(1).minusDays(1);
+        return firstDayOfMonth.format(formatter) + "-" + lastDayOfMonth.format(formatter);
     }
 
 }

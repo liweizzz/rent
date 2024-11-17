@@ -63,6 +63,11 @@ public class ReceiptVO {
     private Integer peopleCount;
 
     /**
+     * 居住总人数
+     */
+    private Integer allPeopleCount;
+
+    /**
      * 水费
      */
     private String waterMoney;

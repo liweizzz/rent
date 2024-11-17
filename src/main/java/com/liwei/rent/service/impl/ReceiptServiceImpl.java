@@ -3,6 +3,7 @@ package com.liwei.rent.service.impl;
 import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.ExcelWriter;
 import com.alibaba.excel.write.metadata.WriteSheet;
+import com.alibaba.excel.write.metadata.fill.FillConfig;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
 import com.liwei.rent.common.Enum.DelFlagEnum;
@@ -339,16 +340,28 @@ public class ReceiptServiceImpl extends ServiceImpl<ReceiptMapper, Receipt> impl
 
         List<ReceiptDTO> data = receiptList.stream().map(receipt -> {
             ReceiptDTO receiptDTO = new ReceiptDTO();
-            BeanUtils.copyProperties(receipt, receiptDTO);
-            receiptDTO.setRoomNum(Integer.valueOf(receipt.getRoomNum()));
+            String roomNum = receipt.getRoomNum();
+            //这些房间统计上个月的报表数据
+            if("102".equals(roomNum) || "107".equals(roomNum) || "302".equals(roomNum)
+                    || "307".equals(roomNum) || "309".equals(roomNum) || "311".equals(roomNum)){
+                LambdaQueryWrapper<Receipt> wrapper = new LambdaQueryWrapper<>();
+                wrapper.eq(Receipt::getRoomNum,roomNum)
+                        .likeRight(Receipt::getCreateTime,DateUtils.calMonth(month))
+                        .eq(Receipt::getDelFlag, DelFlagEnum.UN_DEL.value());
+                Receipt lastReceipt = this.getOne(wrapper);
+                BeanUtils.copyProperties(lastReceipt, receiptDTO);
+            }else {
+                BeanUtils.copyProperties(receipt, receiptDTO);
+            }
             receiptDTO.setDeposit(receipt.getDeposit() == null ? BigDecimal.ZERO : receipt.getDeposit());
+            receiptDTO.setRoomNum(Integer.valueOf(roomNum));
+            receiptDTO.setWaterMoney(receipt.getWaterMoney().multiply(BigDecimal.valueOf(receipt.getPeopleCount())));
             return receiptDTO;
         }).collect(Collectors.toList());
         // 创建ExcelWriter对象
         if(CollectionUtils.isEmpty(data)){
             throw new RentException(ErrorCodeEnum.RECEPT_DATE_IS_NULL);
         }
-
         File report = new File(reportPath);
         if(!report.exists()){
             try {
@@ -361,15 +374,14 @@ public class ReceiptServiceImpl extends ServiceImpl<ReceiptMapper, Receipt> impl
         ExcelWriter writer = EasyExcel.write(report).withTemplate(new File(templetPath)).build();
         Workbook workbook = writer.writeContext().writeWorkbookHolder().getWorkbook();
         workbook.setForceFormulaRecalculation(true);
+        workbook.setSheetName(0,DateUtils.getReportFieldName("yy.M.d"));
         WriteSheet sheet = EasyExcel.writerSheet().registerWriteHandler(new EasyExcelCellWriteHandler()).build();
-//        Map<String,Object> value = new HashMap<>();
-//        value.put("otherMoney",500);
-//        value.put("otherInfo","jgjkgjhg");
-//        FillConfig fillConfig = FillConfig.builder().forceNewRow(Boolean.TRUE).build();
-
-        writer.fill(data,sheet).finish();
-        this.download(response,report);
+        Map<String,Object> value = new HashMap<>();
+        value.put("title",DateUtils.getReportFieldName("yyyy年M月d日") + "房租报表");
+        FillConfig fillConfig = FillConfig.builder().forceNewRow(Boolean.TRUE).build();
 //        EasyExcel.write(fileName).withTemplate(templateFileName).sheet().doFill(data);
+        writer.fill(value,fillConfig,sheet).fill(data,sheet).finish();
+        this.download(response,report);
     }
 
     private void download(HttpServletResponse response,File file){

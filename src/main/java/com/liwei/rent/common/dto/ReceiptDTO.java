@@ -83,6 +83,11 @@ public class ReceiptDTO {
     private Integer peopleCount;
 
     /**
+     * 居住总人数
+     */
+    private Integer allPeopleCount;
+
+    /**
      * 网费
      */
     private BigDecimal internetMoney;

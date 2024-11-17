@@ -1,7 +1,6 @@
 package com.liwei.rent.controller;
 
 import com.liwei.rent.common.Enum.ErrorCodeEnum;
-import com.liwei.rent.common.dto.Result;
 import com.liwei.rent.common.exception.RentException;
 import com.liwei.rent.common.utils.DateUtils;
 import com.liwei.rent.service.IReceiptService;
@@ -21,7 +20,7 @@ public class ReportController {
     private IReceiptService receiptService;
 
     @GetMapping("/download")
-    public Result<Void> downloadReport(String apartmentId, String month, HttpServletResponse response) {
+    public void downloadReport(String apartmentId, String month, HttpServletResponse response) {
         if(StringUtils.isEmpty(apartmentId)){
             throw new RentException(ErrorCodeEnum.APPARTENT_IS_NULL);
         }
@@ -34,6 +33,5 @@ public class ReportController {
             throw new RentException(ErrorCodeEnum.MONTH_IS_ILLEGAL);
         }
         receiptService.exportReceipt(apartmentId,month,response);
-        return Result.ok();
     }
 }
