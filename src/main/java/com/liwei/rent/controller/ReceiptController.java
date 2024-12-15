@@ -51,7 +51,7 @@ public class ReceiptController {
     }
 
     @GetMapping(value = "/getReceipt")
-//    @PermissionCheck("receipt:get")
+    @PermissionCheck("receipt:get")
     public Result<ReceiptDTO> getReceipt(Integer id){
         ReceiptDTO res = new ReceiptDTO();
         Receipt receipt = receiptService.getById(id);
